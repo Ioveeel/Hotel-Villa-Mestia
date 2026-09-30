@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    // Where source lives and where compiled JS goes (used later for production builds)
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    // Modern Node + ES Modules
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "es2023",
+    "lib": ["es2023"],
+    "types": ["node"],
+
+    // Type safety
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+
+    // Module hygiene
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+
+    "sourceMap": true
+  },
+  "include": ["src"]
+}
