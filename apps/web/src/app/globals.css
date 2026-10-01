@@ -1,26 +1,181 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Dark mode follows the system; html.dark / html.light force it. */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:not(.light, .light *)) {
+      @slot;
+    }
+  }
+  &:where(.dark, .dark *) {
+    @slot;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Brand palette (DESIGN.md). Components use the semantic tokens below. */
+:root,
+.light {
+  --snow: #f7f5f0;
+  --sand: #ede6da;
+  --stone: #24221f;
+  --slate: #5e6670;
+  --pine: #2f4a3a;
+  --pine-foreground: #f7f5f0;
+  /* ember fails AA on snow for normal text (3.7:1): decoration and text >= 24px only */
+  --ember: #c2652a;
+  /* ember-ink: AA-safe ember for small text, e.g. prices (4.9:1 on snow) */
+  --ember-ink: #9e4f1b;
+  --glacier: #a9c4d3;
+  --line: #d9d1c3;
+
+  --background: var(--snow);
+  --foreground: var(--stone);
+  --card: #fbfaf7;
+  --card-foreground: var(--stone);
+  --popover: #fbfaf7;
+  --popover-foreground: var(--stone);
+  --primary: var(--pine);
+  --primary-foreground: var(--pine-foreground);
+  --secondary: var(--sand);
+  --secondary-foreground: var(--stone);
+  --muted: var(--sand);
+  --muted-foreground: var(--slate);
+  /* shadcn "accent" = subtle hover surface, not the brand ember */
+  --accent: var(--sand);
+  --accent-foreground: var(--stone);
+  --destructive: #b3261e;
+  --border: var(--line);
+  --input: #c9bfae;
+  --ring: var(--pine);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --snow: #161513;
+    --sand: #24211e;
+    --stone: #f7f5f0;
+    --slate: #9aa3ad;
+    --pine: #6e9c80;
+    --pine-foreground: #161513;
+    --ember: #d9783a;
+    --ember-ink: #e08a4f;
+    --glacier: #22303a;
+    --line: #36322c;
+    --card: #1d1b19;
+    --popover: #1d1b19;
+    --destructive: #f2867a;
+    --input: #46413a;
+  }
+}
+
+.dark {
+  --snow: #161513;
+  --sand: #24211e;
+  --stone: #f7f5f0;
+  --slate: #9aa3ad;
+  --pine: #6e9c80;
+  --pine-foreground: #161513;
+  --ember: #d9783a;
+  --ember-ink: #e08a4f;
+  --glacier: #22303a;
+  --line: #36322c;
+  --card: #1d1b19;
+  --popover: #1d1b19;
+  --destructive: #f2867a;
+  --input: #46413a;
+}
+
+@theme inline {
+  --color-snow: var(--snow);
+  --color-sand: var(--sand);
+  --color-stone: var(--stone);
+  --color-slate: var(--slate);
+  --color-pine: var(--pine);
+  --color-pine-foreground: var(--pine-foreground);
+  --color-ember: var(--ember);
+  --color-ember-ink: var(--ember-ink);
+  --color-glacier: var(--glacier);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Latin/Cyrillic face first, Georgian face catches Georgian glyphs */
+  --font-sans: var(--font-noto-sans), var(--font-noto-sans-georgian), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-noto-serif), var(--font-noto-serif-georgian), ui-serif, Georgia, serif;
+
+  /* Fluid type, 375px -> 1200px */
+  --text-display: clamp(2.5rem, 1.6rem + 3.8vw, 4.5rem);
+  --text-display--line-height: 1.1;
+  --text-h1: clamp(2rem, 1.5rem + 2.2vw, 3.25rem);
+  --text-h1--line-height: 1.15;
+  --text-h2: clamp(1.625rem, 1.3rem + 1.4vw, 2.375rem);
+  --text-h2--line-height: 1.2;
+  --text-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
+  --text-h3--line-height: 1.3;
+  --text-lead: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+  --text-lead--line-height: 1.6;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    color-scheme: light dark;
+    -webkit-text-size-adjust: 100%;
+  }
+  html.light {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground leading-relaxed;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading text-balance;
+  }
+  /* Georgian script needs more vertical room */
+  :lang(ka) body,
+  :lang(ka) p {
+    line-height: 1.75;
+  }
+  :lang(ka) :is(h1, h2, h3, h4) {
+    line-height: 1.35;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
 }
