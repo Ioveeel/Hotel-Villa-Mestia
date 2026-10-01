@@ -2,14 +2,10 @@ import { and, asc, eq, gt, lt, ne, notExists } from "drizzle-orm";
 import { Router } from "express";
 import { z } from "zod";
 import { db } from "../db/index.js";
-import {
-  bookings,
-  guests,
-  mealOptions,
-  rooms,
-  roomTypes,
-} from "../db/schema.js";
-import { nightsBetween, stayDatesIssues } from "../lib/dates.js";
+import { bookings, guests, rooms } from "../db/schema.js";
+import { nightsBetween } from "../lib/dates.js";
+import { calculatePrice } from "../lib/pricing.js";
+import { checkStayDates, stayFields } from "../lib/stayInput.js";
 import { HttpError } from "../middleware/errorHandler.js";
 import { bookingRateLimit } from "../middleware/rateLimit.js";
 
@@ -44,39 +40,8 @@ const guestBody = z.strictObject(
 );
 
 const createBookingBody = z
-  .object({
-    roomTypeId: z
-      .number({ error: "roomTypeId must be a number" })
-      .int("roomTypeId must be a whole number")
-      .positive("roomTypeId must be positive"),
-    checkIn: z.iso.date({ error: "checkIn must be a valid date (YYYY-MM-DD)" }),
-    checkOut: z.iso.date({ error: "checkOut must be a valid date (YYYY-MM-DD)" }),
-    adults: z
-      .number({ error: "adults must be a number" })
-      .int("adults must be a whole number")
-      .min(1, "adults must be at least 1"),
-    children: z
-      .number({ error: "children must be a number" })
-      .int("children must be a whole number")
-      .min(0, "children cannot be negative")
-      .default(0),
-    breakfast: z.boolean({ error: "breakfast must be true or false" }).default(false),
-    dinner: z.boolean({ error: "dinner must be true or false" }).default(false),
-    guest: guestBody,
-  })
-  .check((ctx) => {
-    // Cross-field checks only make sense when every field is valid
-    if (ctx.issues.length > 0) return;
-    const { checkIn, checkOut } = ctx.value;
-    for (const issue of stayDatesIssues(checkIn, checkOut)) {
-      ctx.issues.push({
-        code: "custom",
-        input: ctx.value[issue.path],
-        path: [issue.path],
-        message: issue.message,
-      });
-    }
-  });
+  .object({ ...stayFields("body"), guest: guestBody })
+  .check(checkStayDates);
 
 const NO_OVERLAP_CONSTRAINT = "bookings_no_overlap";
 
@@ -100,38 +65,8 @@ bookingsRouter.post("/", bookingRateLimit, async (req, res) => {
   }
   const body = parsed.data;
   const nights = nightsBetween(body.checkIn, body.checkOut);
-  const people = body.adults + body.children;
-
-  const [roomType] = await db
-    .select()
-    .from(roomTypes)
-    .where(eq(roomTypes.id, body.roomTypeId));
-  if (!roomType) {
-    throw new HttpError(404, "Room type not found");
-  }
-  if (people > roomType.maxGuests) {
-    throw new HttpError(
-      400,
-      `${roomType.name} room allows at most ${roomType.maxGuests} guests`,
-    );
-  }
-
-  // Children currently pay the same as adults
-  const activeMeals = await db
-    .select({ type: mealOptions.type, price: mealOptions.price })
-    .from(mealOptions)
-    .where(eq(mealOptions.isActive, true));
-  const mealPrice = (type: "breakfast" | "dinner", wanted: boolean) => {
-    if (!wanted) return 0;
-    const meal = activeMeals.find((m) => m.type === type);
-    if (!meal) throw new HttpError(400, `${type} is not available`);
-    return meal.price;
-  };
-  const breakfastPrice = mealPrice("breakfast", body.breakfast);
-  const dinnerPrice = mealPrice("dinner", body.dinner);
-
-  const roomTotal = roomType.basePrice * nights;
-  const mealsTotal = (breakfastPrice + dinnerPrice) * people * nights;
+  const { roomType, breakfastPrice, dinnerPrice, roomTotal, mealsTotal } =
+    await calculatePrice({ ...body, nights });
 
   // Same overlap rule as the bookings_no_overlap constraint: [check_in, check_out)
   const overlappingBooking = db
