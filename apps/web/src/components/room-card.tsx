@@ -9,16 +9,16 @@ type Props = Pick<RoomType, "name" | "beds" | "maxGuests" | "basePrice"> & {
 
 export function RoomCard({ name, beds, maxGuests, basePrice, href }: Props) {
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-[transform,box-shadow] duration-300 ease-out-soft hover:-translate-y-1 hover:shadow-lg hover:shadow-stone/8 motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+    <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-[transform,box-shadow] duration-300 ease-out-soft hover:-translate-y-1 hover:shadow-lg hover:shadow-foreground/8 motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       {/* Placeholder until real photos exist; will be next/image */}
       <div
         aria-hidden
-        className="relative aspect-[4/3] overflow-hidden bg-gradient-to-b from-glacier via-sand to-sand"
+        className="relative aspect-[4/3] overflow-hidden bg-gradient-to-b from-glacier via-surface to-surface"
       >
         <svg
           viewBox="0 0 400 300"
           preserveAspectRatio="xMidYMax slice"
-          className="absolute inset-0 size-full text-pine/25"
+          className="absolute inset-0 size-full text-primary/25"
         >
           <path
             fill="currentColor"
@@ -48,7 +48,7 @@ export function RoomCard({ name, beds, maxGuests, basePrice, href }: Props) {
 
         <div className="mt-auto flex items-end justify-between gap-4">
           <p>
-            <span className="block text-xl font-semibold text-ember-ink">
+            <span className="block text-xl font-semibold text-price">
               {formatPrice(basePrice)}
             </span>
             <span className="text-sm text-muted-foreground">per night</span>

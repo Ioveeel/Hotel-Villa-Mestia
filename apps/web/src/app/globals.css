@@ -14,108 +14,98 @@
   }
 }
 
-/* Brand palette (DESIGN.md). Components use the semantic tokens below. */
+/* Semantic color tokens (DESIGN.md palette). Light values: */
 :root,
 .light {
-  --snow: #f7f5f0;
-  --sand: #ede6da;
-  --stone: #24221f;
-  --slate: #5e6670;
-  --pine: #2f4a3a;
-  --pine-foreground: #f7f5f0;
-  /* ember fails AA on snow for normal text (3.7:1): decoration and text >= 24px only */
-  --ember: #c2652a;
-  /* ember-ink: AA-safe ember for small text, e.g. prices (4.9:1 on snow) */
-  --ember-ink: #9e4f1b;
+  --background: #f7f5f0;
+  --surface: #ede6da;
+  --foreground: #24221f;
+  --muted-foreground: #5e6670;
+  --primary: #2f4a3a;
+  --primary-foreground: #f7f5f0;
+  /* accent fails AA for normal text in light mode: decoration and large/bold text only */
+  --accent: #c2652a;
+  --accent-foreground: #f7f5f0;
+  /* AA-safe accent-colored text, e.g. prices (5.4:1 on background) */
+  --price: #9e4f1b;
   --glacier: #a9c4d3;
-  --line: #d9d1c3;
-
-  --background: var(--snow);
-  --foreground: var(--stone);
+  --border: #d9d1c3;
   --card: #fbfaf7;
-  --card-foreground: var(--stone);
-  --popover: #fbfaf7;
-  --popover-foreground: var(--stone);
-  --primary: var(--pine);
-  --primary-foreground: var(--pine-foreground);
-  --secondary: var(--sand);
-  --secondary-foreground: var(--stone);
-  --muted: var(--sand);
-  --muted-foreground: var(--slate);
-  /* shadcn "accent" = subtle hover surface, not the brand ember */
-  --accent: var(--sand);
-  --accent-foreground: var(--stone);
-  --destructive: #b3261e;
-  --border: var(--line);
   --input: #c9bfae;
-  --ring: var(--pine);
+  --destructive: #b3261e;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
-    --snow: #161513;
-    --sand: #24211e;
-    --stone: #f7f5f0;
-    --slate: #9aa3ad;
-    --pine: #6e9c80;
-    --pine-foreground: #161513;
-    --ember: #d9783a;
-    --ember-ink: #e08a4f;
+    --background: #161513;
+    --surface: #24211e;
+    --foreground: #f7f5f0;
+    --muted-foreground: #9aa3ad;
+    --primary: #6e9c80;
+    --primary-foreground: #161513;
+    --accent: #d9783a;
+    --accent-foreground: #161513;
+    --price: #e08a4f;
     --glacier: #22303a;
-    --line: #36322c;
+    --border: #36322c;
     --card: #1d1b19;
-    --popover: #1d1b19;
-    --destructive: #f2867a;
     --input: #46413a;
+    --destructive: #f2867a;
   }
 }
 
 .dark {
-  --snow: #161513;
-  --sand: #24211e;
-  --stone: #f7f5f0;
-  --slate: #9aa3ad;
-  --pine: #6e9c80;
-  --pine-foreground: #161513;
-  --ember: #d9783a;
-  --ember-ink: #e08a4f;
+  --background: #161513;
+  --surface: #24211e;
+  --foreground: #f7f5f0;
+  --muted-foreground: #9aa3ad;
+  --primary: #6e9c80;
+  --primary-foreground: #161513;
+  --accent: #d9783a;
+  --accent-foreground: #161513;
+  --price: #e08a4f;
   --glacier: #22303a;
-  --line: #36322c;
+  --border: #36322c;
   --card: #1d1b19;
-  --popover: #1d1b19;
-  --destructive: #f2867a;
   --input: #46413a;
+  --destructive: #f2867a;
+}
+
+/* shadcn aliases. Declared on every theme scope so nested .light/.dark re-resolve them. */
+:root,
+.light,
+.dark {
+  --muted: var(--surface);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--foreground);
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --ring: var(--primary);
 }
 
 @theme inline {
-  --color-snow: var(--snow);
-  --color-sand: var(--sand);
-  --color-stone: var(--stone);
-  --color-slate: var(--slate);
-  --color-pine: var(--pine);
-  --color-pine-foreground: var(--pine-foreground);
-  --color-ember: var(--ember);
-  --color-ember-ink: var(--ember-ink);
-  --color-glacier: var(--glacier);
-
   --color-background: var(--background);
+  --color-surface: var(--surface);
   --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
+  --color-price: var(--price);
+  --color-glacier: var(--glacier);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-destructive: var(--destructive);
 
   /* Latin/Cyrillic face first, Georgian face catches Georgian glyphs */
   --font-sans: var(--font-noto-sans), var(--font-noto-sans-georgian), ui-sans-serif, system-ui, sans-serif;

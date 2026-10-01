@@ -14,16 +14,19 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// Hex values mirror globals.css, for reference only.
 const colors = [
-  { name: "snow", token: "bg-snow", note: "background" },
-  { name: "sand", token: "bg-sand", note: "surface" },
-  { name: "stone", token: "bg-stone", note: "foreground" },
-  { name: "slate", token: "bg-slate", note: "muted text" },
-  { name: "pine", token: "bg-pine", note: "primary" },
-  { name: "ember", token: "bg-ember", note: "accent, decorative" },
-  { name: "ember-ink", token: "bg-ember-ink", note: "accent text, prices" },
-  { name: "glacier", token: "bg-glacier", note: "decorative" },
-  { name: "border", token: "bg-border", note: "lines" },
+  { name: "background", bg: "bg-background", light: "#F7F5F0", dark: "#161513" },
+  { name: "surface", bg: "bg-surface", light: "#EDE6DA", dark: "#24211E" },
+  { name: "foreground", bg: "bg-foreground", light: "#24221F", dark: "#F7F5F0" },
+  { name: "muted-foreground", bg: "bg-muted-foreground", light: "#5E6670", dark: "#9AA3AD" },
+  { name: "primary", bg: "bg-primary", light: "#2F4A3A", dark: "#6E9C80" },
+  { name: "primary-foreground", bg: "bg-primary-foreground", light: "#F7F5F0", dark: "#161513" },
+  { name: "accent", bg: "bg-accent", light: "#C2652A", dark: "#D9783A" },
+  { name: "accent-foreground", bg: "bg-accent-foreground", light: "#F7F5F0", dark: "#161513" },
+  { name: "price", bg: "bg-price", light: "#9E4F1B", dark: "#E08A4F" },
+  { name: "glacier", bg: "bg-glacier", light: "#A9C4D3", dark: "#22303A" },
+  { name: "border", bg: "bg-border", light: "#D9D1C3", dark: "#36322C" },
 ];
 
 function Section({
@@ -48,7 +51,7 @@ export default function StyleguidePage() {
     <main className="mx-auto w-full max-w-[1200px] space-y-16 px-4 py-10 sm:px-6 md:py-16">
       <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium tracking-wide text-ember-ink">
+          <p className="text-sm font-medium tracking-wide text-price">
             Villa Mestia
           </p>
           <h1 className="text-h1">Styleguide</h1>
@@ -60,15 +63,21 @@ export default function StyleguidePage() {
       </header>
 
       <Section title="Colors">
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        <p className="text-sm text-muted-foreground">
+          Each swatch: left half light, right half dark. Labels: light / dark hex.
+        </p>
+        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {colors.map((c) => (
             <li key={c.name} className="space-y-2">
-              <div
-                className={`aspect-[3/2] rounded-lg border border-border ${c.token}`}
-              />
+              <div className="flex aspect-[3/2] overflow-hidden rounded-lg border border-border">
+                <div className={`light flex-1 ${c.bg}`} title="Light" />
+                <div className={`dark flex-1 ${c.bg}`} title="Dark" />
+              </div>
               <div>
                 <p className="font-medium">{c.name}</p>
-                <p className="text-sm text-muted-foreground">{c.note}</p>
+                <p className="font-mono text-sm text-muted-foreground">
+                  {c.light} / {c.dark}
+                </p>
               </div>
             </li>
           ))}
@@ -139,7 +148,7 @@ export default function StyleguidePage() {
           <Badge>Confirmed</Badge>
           <Badge variant="secondary">Breakfast included</Badge>
           <Badge variant="glacier">Mountain view</Badge>
-          <Badge variant="ember">2 rooms left</Badge>
+          <Badge variant="accent">2 rooms left</Badge>
           <Badge variant="outline">Outline</Badge>
         </div>
       </Section>

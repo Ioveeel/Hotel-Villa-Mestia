@@ -17,7 +17,7 @@ const badgeVariants = cva(
           "border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
         ghost: "hover:bg-muted hover:text-muted-foreground",
         glacier: "bg-glacier text-foreground",
-        ember: "border-ember/40 text-ember-ink",
+        accent: "border-accent/40 text-price",
         link: "text-primary underline-offset-4 hover:underline",
       },
     },
