@@ -1,0 +1,2 @@
+ALTER TABLE "guests" ADD COLUMN "document_number" text;--> statement-breakpoint
+ALTER TABLE "guests" ADD CONSTRAINT "guests_document_number_check" CHECK ("guests"."document_number" ~ '^[A-Za-z0-9]{5,20}$');

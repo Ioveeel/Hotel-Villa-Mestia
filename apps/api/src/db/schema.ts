@@ -89,17 +89,30 @@ export const rooms = pgTable(
   (t) => [check("rooms_number_check", sql`${t.number} > 0`)],
 );
 
-export const guests = pgTable("guests", {
-  id: serial("id").primaryKey(),
-  firstName: text("first_name").notNull(),
-  lastName: text("last_name").notNull(),
-  email: text("email"),
-  phone: text("phone"),
-  country: text("country"),
-  notes: text("notes"),
-  createdAt: createdAt(),
-  updatedAt: updatedAt(),
-});
+export const guests = pgTable(
+  "guests",
+  {
+    id: serial("id").primaryKey(),
+    firstName: text("first_name").notNull(),
+    lastName: text("last_name").notNull(),
+    email: text("email"),
+    // Nullable: Booking.com guests may not have one. Required on the website form.
+    phone: text("phone"),
+    country: text("country"),
+    // ID or passport number, added by admin at check-in.
+    // Sensitive: never return from public endpoints.
+    documentNumber: text("document_number"),
+    notes: text("notes"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    check(
+      "guests_document_number_check",
+      sql`${t.documentNumber} ~ '^[A-Za-z0-9]{5,20}$'`,
+    ),
+  ],
+);
 
 export const mealOptions = pgTable(
   "meal_options",

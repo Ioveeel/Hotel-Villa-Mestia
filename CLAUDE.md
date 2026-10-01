@@ -66,4 +66,12 @@ Website + booking system for a small 9-room hotel.
 - Daily revenue: net_total ÷ nights, counted for each night of the stay
   (check_in ≤ date < check_out). Cancelled bookings are excluded.
 - Daily profit = daily revenue - expenses for that date.
+- Website bookings are confirmed immediately (status = confirmed) if a room is free.
+- Guests:
+  - Website booking form: firstName, lastName, phone (required),
+    email (optional), country (optional).
+  - documentNumber (ID or passport number) is not collected on the website;
+    admin adds it at check-in. Nullable, 5-20 letters/digits, no strict format
+    (foreign passports differ from the 11-digit Georgian ID).
+  - documentNumber is sensitive: never return it from public endpoints.
 - Not implemented yet: card payment bank fee, seasonal prices, child meal pricing.
