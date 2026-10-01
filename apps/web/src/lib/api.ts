@@ -36,8 +36,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export function getRoomTypes(): Promise<RoomType[]> {
-  return request("/room-types");
+export function getRoomTypes(init?: RequestInit): Promise<RoomType[]> {
+  return request("/room-types", init);
 }
 
 export function getAvailability(query: AvailabilityQuery): Promise<Availability[]> {
