@@ -3,10 +3,8 @@ import { Router } from "express";
 import { z } from "zod";
 import { db } from "../db/index.js";
 import { bookings, rooms, roomTypes } from "../db/schema.js";
-import { nightsBetween, todayInHotel } from "../lib/dates.js";
+import { nightsBetween, stayDatesIssues } from "../lib/dates.js";
 import { HttpError } from "../middleware/errorHandler.js";
-
-const MAX_NIGHTS = 30;
 
 const availabilityQuery = z
   .object({
@@ -22,28 +20,12 @@ const availabilityQuery = z
     // Cross-field checks only make sense when every field is valid
     if (ctx.issues.length > 0) return;
     const { checkIn, checkOut } = ctx.value;
-    if (checkIn < todayInHotel()) {
+    for (const issue of stayDatesIssues(checkIn, checkOut)) {
       ctx.issues.push({
         code: "custom",
-        input: checkIn,
-        path: ["checkIn"],
-        message: "checkIn cannot be in the past",
-      });
-    }
-    const nights = nightsBetween(checkIn, checkOut);
-    if (nights < 1) {
-      ctx.issues.push({
-        code: "custom",
-        input: checkOut,
-        path: ["checkOut"],
-        message: "checkOut must be after checkIn",
-      });
-    } else if (nights > MAX_NIGHTS) {
-      ctx.issues.push({
-        code: "custom",
-        input: checkOut,
-        path: ["checkOut"],
-        message: `Stay cannot be longer than ${MAX_NIGHTS} nights`,
+        input: ctx.value[issue.path],
+        path: [issue.path],
+        message: issue.message,
       });
     }
   });

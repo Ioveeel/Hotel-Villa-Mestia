@@ -1,6 +1,7 @@
 import express from "express";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 import { availabilityRouter } from "./routes/availability.js";
+import { bookingsRouter } from "./routes/bookings.js";
 import { healthRouter } from "./routes/health.js";
 import { roomTypesRouter } from "./routes/roomTypes.js";
 
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use(healthRouter);
 app.use("/room-types", roomTypesRouter);
 app.use("/availability", availabilityRouter);
+app.use("/bookings", bookingsRouter);
 
 app.use(notFound);
 app.use(errorHandler);
