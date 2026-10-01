@@ -38,6 +38,30 @@ export type AvailabilityQuery = {
   guests: number;
 };
 
+// GET /quote
+export type QuoteQuery = {
+  roomTypeId: number;
+  checkIn: string;
+  checkOut: string;
+  adults: number;
+  children: number;
+  breakfast: boolean;
+  dinner: boolean;
+};
+
+export type Quote = {
+  nights: number;
+  roomTotal: number;
+  mealsTotal: number;
+  totalPrice: number;
+  breakdown: {
+    roomPerNight: number;
+    // null when the meal is not offered
+    breakfastPerPersonPerNight: number | null;
+    dinnerPerPersonPerNight: number | null;
+  };
+};
+
 // POST /bookings request
 export type CreateBookingInput = {
   roomTypeId: number;

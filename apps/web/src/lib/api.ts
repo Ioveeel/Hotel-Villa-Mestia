@@ -4,6 +4,8 @@ import type {
   AvailabilityQuery,
   Booking,
   CreateBookingInput,
+  Quote,
+  QuoteQuery,
   RoomType,
 } from "./types";
 
@@ -14,6 +16,22 @@ export class ApiError extends Error {
   ) {
     super(message);
   }
+}
+
+const fieldLabels: Record<string, string> = {
+  checkIn: "Check-in",
+  checkOut: "Check-out",
+  firstName: "First name",
+  lastName: "Last name",
+};
+
+// API messages start with the field name ("checkIn cannot be in the past")
+export function humanizeApiMessage(message: string): string {
+  const text = message.replace(
+    /\b(checkIn|checkOut|firstName|lastName)\b/g,
+    (key) => fieldLabels[key],
+  );
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 // Server calls the API directly; the browser goes through the /api rewrite
@@ -40,13 +58,29 @@ export function getRoomTypes(init?: RequestInit): Promise<RoomType[]> {
   return request("/room-types", init);
 }
 
-export function getAvailability(query: AvailabilityQuery): Promise<Availability[]> {
+export function getAvailability(
+  query: AvailabilityQuery,
+  init?: RequestInit,
+): Promise<Availability[]> {
   const params = new URLSearchParams({
     checkIn: query.checkIn,
     checkOut: query.checkOut,
     guests: String(query.guests),
   });
-  return request(`/availability?${params}`);
+  return request(`/availability?${params}`, init);
+}
+
+export function getQuote(query: QuoteQuery, init?: RequestInit): Promise<Quote> {
+  const params = new URLSearchParams({
+    roomTypeId: String(query.roomTypeId),
+    checkIn: query.checkIn,
+    checkOut: query.checkOut,
+    adults: String(query.adults),
+    children: String(query.children),
+    breakfast: String(query.breakfast),
+    dinner: String(query.dinner),
+  });
+  return request(`/quote?${params}`, init);
 }
 
 export function createBooking(input: CreateBookingInput): Promise<Booking> {
