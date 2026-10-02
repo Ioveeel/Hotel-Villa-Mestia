@@ -86,3 +86,4 @@ Website + booking system for Villa Mestia Hotel, a small 9-room hotel in Mestia.
   channel manager sync, client IP for rate limiting behind the Next proxy — decide
   at deployment, depends on hosting (reverse proxy / platform headers / direct API calls).
   real hotel texts (home page copy is placeholder, may contain invented facts).
+  structured validation errors from API ({ path, message }), shared zod schemas in packages/shared
