@@ -256,3 +256,26 @@ export const expenses = pgTable(
     check("expenses_amount_check", sql`${t.amount} > 0`),
   ],
 );
+
+// Emails are stored lowercase.
+export const admins = pgTable("admins", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name"),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: createdAt(),
+});
+
+// id is the SHA-256 hash (hex) of the session token; the token itself is never stored.
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: text("id").primaryKey(),
+    adminId: integer("admin_id")
+      .notNull()
+      .references(() => admins.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("sessions_admin_id_idx").on(t.adminId)],
+);

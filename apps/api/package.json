@@ -8,10 +8,12 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx --env-file=.env src/db/seed.ts"
+    "db:seed": "tsx --env-file=.env src/db/seed.ts",
+    "admin:create": "tsx --env-file=.env src/scripts/createAdmin.ts"
   },
   "packageManager": "pnpm@10.26.2",
   "dependencies": {
+    "argon2": "^0.45.1",
     "drizzle-orm": "^0.45.3",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
