@@ -1,8 +1,8 @@
-import { eq } from "drizzle-orm";
+import { and, eq, isNull, ne } from "drizzle-orm";
 import { Router } from "express";
 import { z } from "zod";
 import { db } from "../../db/index.js";
-import { bookings, guests, rooms } from "../../db/schema.js";
+import { bookings, guests, rooms, roomTypes } from "../../db/schema.js";
 import { nightsBetween } from "../../lib/dates.js";
 import { isNoOverlapViolation } from "../../lib/dbErrors.js";
 import {
@@ -13,6 +13,7 @@ import {
 } from "../../lib/guestInput.js";
 import { calculateAdminPrice } from "../../lib/pricing.js";
 import { checkStayDates, stayFields } from "../../lib/stayInput.js";
+import { idParams, parseInput } from "../../lib/validation.js";
 import { HttpError } from "../../middleware/errorHandler.js";
 
 // Admin may enter stays that already started (e.g. late Booking.com entries)
@@ -79,17 +80,6 @@ const createBody = z
 
 type PreviewBody = z.infer<typeof previewBody>;
 
-function parseBody<T extends z.ZodType>(schema: T, input: unknown): z.infer<T> {
-  const parsed = schema.safeParse(input);
-  if (!parsed.success) {
-    throw new HttpError(
-      400,
-      parsed.error.issues.map((i) => i.message).join("; "),
-    );
-  }
-  return parsed.data;
-}
-
 // Validates the room and calculates prices. Writes nothing.
 async function priceBooking(body: PreviewBody) {
   const [room] = await db.select().from(rooms).where(eq(rooms.id, body.roomId));
@@ -109,7 +99,7 @@ async function priceBooking(body: PreviewBody) {
 export const adminBookingsRouter = Router();
 
 adminBookingsRouter.post("/preview", async (req, res) => {
-  const body = parseBody(previewBody, req.body);
+  const body = parseInput(previewBody, req.body);
   const { nights, price } = await priceBooking(body);
 
   // In tetri
@@ -125,7 +115,7 @@ adminBookingsRouter.post("/preview", async (req, res) => {
 });
 
 adminBookingsRouter.post("/", async (req, res) => {
-  const body = parseBody(createBody, req.body);
+  const body = parseInput(createBody, req.body);
   const { room, nights, price } = await priceBooking(body);
 
   try {
@@ -183,4 +173,116 @@ adminBookingsRouter.post("/", async (req, res) => {
     }
     throw err;
   }
+});
+
+const payBody = z.strictObject(
+  {
+    method: z.enum(["cash", "card"], { error: "method must be cash or card" }),
+  },
+  { error: "Body must be { method: cash | card }" },
+);
+
+// Full booking with guest, room and prices (in tetri). Admin only: includes documentNumber.
+async function getBookingDetails(id: number) {
+  const [row] = await db
+    .select({
+      booking: bookings,
+      roomNumber: rooms.number,
+      roomTypeName: roomTypes.name,
+      guest: {
+        id: guests.id,
+        firstName: guests.firstName,
+        lastName: guests.lastName,
+        phone: guests.phone,
+        email: guests.email,
+        country: guests.country,
+        documentNumber: guests.documentNumber,
+        notes: guests.notes,
+      },
+    })
+    .from(bookings)
+    .innerJoin(rooms, eq(rooms.id, bookings.roomId))
+    .innerJoin(roomTypes, eq(roomTypes.id, rooms.roomTypeId))
+    .innerJoin(guests, eq(guests.id, bookings.guestId))
+    .where(eq(bookings.id, id));
+  if (!row) throw new HttpError(404, "Booking not found");
+
+  return {
+    ...row.booking,
+    nights: nightsBetween(row.booking.checkIn, row.booking.checkOut),
+    roomNumber: row.roomNumber,
+    roomTypeName: row.roomTypeName,
+    guest: row.guest,
+  };
+}
+
+// Called when a conditional update matched no row: tells 404 from 409
+async function explainNoUpdate(id: number) {
+  const [row] = await db
+    .select({ status: bookings.status, paidAt: bookings.paidAt })
+    .from(bookings)
+    .where(eq(bookings.id, id));
+  if (!row) throw new HttpError(404, "Booking not found");
+  return row;
+}
+
+adminBookingsRouter.get("/:id", async (req, res) => {
+  const { id } = parseInput(idParams, req.params);
+  res.json(await getBookingDetails(id));
+});
+
+adminBookingsRouter.post("/:id/pay", async (req, res) => {
+  const { id } = parseInput(idParams, req.params);
+  const { method } = parseInput(payBody, req.body);
+
+  const updated = await db
+    .update(bookings)
+    .set({ paymentMethod: method, paidAt: new Date() })
+    .where(
+      and(
+        eq(bookings.id, id),
+        ne(bookings.status, "cancelled"),
+        isNull(bookings.paidAt),
+      ),
+    )
+    .returning({ id: bookings.id });
+
+  if (updated.length === 0) {
+    const row = await explainNoUpdate(id);
+    if (row.status === "cancelled") {
+      throw new HttpError(409, "Booking is cancelled");
+    }
+    throw new HttpError(409, "Booking is already paid");
+  }
+  res.json(await getBookingDetails(id));
+});
+
+adminBookingsRouter.post("/:id/unpay", async (req, res) => {
+  const { id } = parseInput(idParams, req.params);
+
+  const updated = await db
+    .update(bookings)
+    .set({ paymentMethod: null, paidAt: null })
+    .where(eq(bookings.id, id))
+    .returning({ id: bookings.id });
+  if (updated.length === 0) throw new HttpError(404, "Booking not found");
+
+  res.json(await getBookingDetails(id));
+});
+
+// Payment info is kept as it was
+adminBookingsRouter.post("/:id/cancel", async (req, res) => {
+  const { id } = parseInput(idParams, req.params);
+
+  const updated = await db
+    .update(bookings)
+    .set({ status: "cancelled" })
+    .where(and(eq(bookings.id, id), ne(bookings.status, "cancelled")))
+    .returning({ id: bookings.id });
+
+  if (updated.length === 0) {
+    await explainNoUpdate(id);
+    throw new HttpError(409, "Booking is already cancelled");
+  }
+  res.json(await getBookingDetails(id));
 });
