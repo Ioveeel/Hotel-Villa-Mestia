@@ -38,3 +38,19 @@ export function formatDateTime(iso: string): string {
     timeZone: "Asia/Tbilisi",
   }).format(new Date(iso));
 }
+
+// "2026-10" -> "October 2026"
+export function formatMonth(month: string): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${month}-01T00:00:00Z`));
+}
+
+// 22050 -> "220.50", 22000 -> "220" (for prefilling amount inputs)
+export function formatTetriAsGel(tetri: number): string {
+  const lari = Math.floor(tetri / 100);
+  const rest = tetri % 100;
+  return rest ? `${lari}.${String(rest).padStart(2, "0")}` : String(lari);
+}

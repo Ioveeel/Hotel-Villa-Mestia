@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { sourceStyles } from "@/components/admin/booking-calendar";
+import { describedBy, Field, Select } from "@/components/admin/form-fields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   ApiError,
   createAdminBooking,
@@ -36,9 +36,6 @@ const NETWORK_ERROR = "Could not reach the server. Please try again.";
 const CONFLICT_ERROR = "Room is already booked for these dates";
 
 const sources: AdminBookingSource[] = ["booking_com", "phone", "walk_in"];
-
-const selectClassName =
-  "h-11 w-full appearance-none rounded-lg border border-input bg-card pr-10 pl-4 text-base text-foreground transition-[border-color,box-shadow] duration-200 outline-none hover:border-foreground/30 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/25 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20";
 
 // Optional text fields are "" in the form and omitted from the request
 const optional = (schema: z.ZodString) =>
@@ -155,78 +152,6 @@ function toPreviewInput(
     ...(notes && { notes }),
     ...(roomTotal && { roomTotal }),
   };
-}
-
-function Field({
-  id,
-  label,
-  optional,
-  error,
-  hint,
-  className,
-  children,
-}: {
-  id: string;
-  label: string;
-  optional?: boolean;
-  error?: string;
-  hint?: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={cn("space-y-2", className)}>
-      <Label htmlFor={id}>
-        {label}
-        {optional && (
-          <span className="font-normal text-muted-foreground">(optional)</span>
-        )}
-      </Label>
-      {children}
-      {hint && !error && (
-        <p id={`${id}-hint`} className="text-sm text-muted-foreground">
-          {hint}
-        </p>
-      )}
-      {error && (
-        <p id={`${id}-error`} className="text-sm text-destructive">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
-
-// aria props for an input rendered inside <Field>
-function describedBy(id: string, error?: string, hint?: string) {
-  return {
-    "aria-invalid": error ? true : undefined,
-    "aria-describedby": error ? `${id}-error` : hint ? `${id}-hint` : undefined,
-  } as const;
-}
-
-function Select({
-  id,
-  error,
-  children,
-  ...props
-}: React.ComponentProps<"select"> & { error?: string }) {
-  return (
-    <div className="relative">
-      <select
-        id={id}
-        className={selectClassName}
-        {...describedBy(id ?? "", error)}
-        {...props}
-      >
-        {children}
-      </select>
-      <ChevronDown
-        aria-hidden
-        className="pointer-events-none absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-muted-foreground"
-      />
-    </div>
-  );
 }
 
 function Section({

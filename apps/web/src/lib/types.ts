@@ -248,3 +248,45 @@ export type AdminBookingDetails = {
   createdAt: string;
   guest: AdminGuest;
 };
+
+export type ExpenseCategory =
+  | "food"
+  | "utilities"
+  | "salaries"
+  | "maintenance"
+  | "supplies"
+  | "taxes"
+  | "other";
+
+// GET /admin/expenses (also returned by POST and PATCH). Admin only.
+export type Expense = {
+  id: number;
+  date: string;
+  category: ExpenseCategory;
+  amount: number;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// GET /admin/expenses. Range is inclusive: [from, to].
+export type ExpenseList = {
+  from: string;
+  to: string;
+  total: number;
+  totalsByCategory: { category: ExpenseCategory; total: number }[];
+  // Newest first
+  expenses: Expense[];
+};
+
+export type CreateExpenseInput = {
+  date: string;
+  category: ExpenseCategory;
+  amount: number;
+  description?: string;
+};
+
+// null clears the description
+export type UpdateExpenseInput = Partial<
+  Omit<CreateExpenseInput, "description"> & { description: string | null }
+>;

@@ -13,10 +13,14 @@ import type {
   Calendar,
   CreateAdminBookingInput,
   CreateBookingInput,
+  CreateExpenseInput,
+  Expense,
+  ExpenseList,
   PaymentMethod,
   Quote,
   QuoteQuery,
   RoomType,
+  UpdateExpenseInput,
 } from "./types";
 
 export class ApiError extends Error {
@@ -185,4 +189,34 @@ export function updateGuestDocument(
     method: "PATCH",
     body: JSON.stringify({ documentNumber }),
   });
+}
+
+// Admin only: on the server, pass the session cookie in init.headers
+export function getExpenses(
+  query: { from: string; to: string },
+  init?: RequestInit,
+): Promise<ExpenseList> {
+  const params = new URLSearchParams(query);
+  return request(`/admin/expenses?${params}`, init);
+}
+
+export function createExpense(input: CreateExpenseInput): Promise<Expense> {
+  return request("/admin/expenses", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function updateExpense(
+  id: number,
+  input: UpdateExpenseInput,
+): Promise<Expense> {
+  return request(`/admin/expenses/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export function deleteExpense(id: number): Promise<void> {
+  return request(`/admin/expenses/${id}`, { method: "DELETE" });
 }

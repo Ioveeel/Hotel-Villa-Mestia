@@ -12,7 +12,7 @@ const sections: { label: string; icon: typeof CalendarDays; href?: string }[] =
   [
     { label: "Calendar", icon: CalendarDays, href: "/admin/calendar" },
     { label: "Bookings", icon: ClipboardList },
-    { label: "Expenses", icon: Receipt },
+    { label: "Expenses", icon: Receipt, href: "/admin/expenses" },
     { label: "Reports", icon: ChartColumn },
   ];
 

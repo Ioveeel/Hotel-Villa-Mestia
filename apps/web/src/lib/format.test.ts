@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { parseGelToTetri } from "./format.ts";
+import { formatTetriAsGel, parseGelToTetri } from "./format.ts";
 
 test("parseGelToTetri: whole lari", () => {
   assert.equal(parseGelToTetri("220"), 22000);
@@ -42,5 +42,15 @@ test("parseGelToTetri: invalid input", () => {
     "10000000",
   ]) {
     assert.equal(parseGelToTetri(input), null, JSON.stringify(input));
+  }
+});
+
+test("formatTetriAsGel round-trips with parseGelToTetri", () => {
+  assert.equal(formatTetriAsGel(22000), "220");
+  assert.equal(formatTetriAsGel(22050), "220.50");
+  assert.equal(formatTetriAsGel(22005), "220.05");
+  assert.equal(formatTetriAsGel(29), "0.29");
+  for (const tetri of [1, 29, 100, 22050, 999999999]) {
+    assert.equal(parseGelToTetri(formatTetriAsGel(tetri)), tetri);
   }
 });
