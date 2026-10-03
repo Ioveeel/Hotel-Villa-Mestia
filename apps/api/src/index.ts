@@ -1,5 +1,6 @@
 import express from "express";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
+import { adminRouter } from "./routes/admin/index.js";
 import { authRouter } from "./routes/auth.js";
 import { availabilityRouter } from "./routes/availability.js";
 import { bookingsRouter } from "./routes/bookings.js";
@@ -14,6 +15,7 @@ app.use(express.json());
 
 app.use(healthRouter);
 app.use("/auth", authRouter);
+app.use("/admin", adminRouter);
 app.use("/room-types", roomTypesRouter);
 app.use("/availability", availabilityRouter);
 app.use("/bookings", bookingsRouter);
