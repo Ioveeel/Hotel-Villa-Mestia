@@ -101,3 +101,14 @@ Website + booking system for Villa Mestia Hotel, a small 9-room hotel in Mestia.
   - report amounts are calculated exactly and rounded to the nearest 5 tetri
     only when displayed (last digit 0-2 -> 0, 3-7 -> 5, 8-9 -> next 10).
     Booking prices and stored amounts are never rounded.
+
+## Before public launch (must be done)
+
+- Telegram notifications for new/cancelled non-Booking.com bookings
+  ("close/reopen on Booking.com"), until a channel manager exists
+- delete all test data (bookings with notes = "TEST" and other test bookings)
+- real hotel texts and photos (home page copy is placeholder, may contain invented facts)
+- privacy policy and cancellation policy pages
+- separate production database (not the development one)
+- client IP for rate limiting behind the proxy (decide with hosting)
+- guest confirmation email (Resend, needs a domain)
