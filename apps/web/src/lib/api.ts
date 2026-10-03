@@ -1,4 +1,5 @@
 import type {
+  Admin,
   ApiErrorBody,
   Availability,
   AvailabilityQuery,
@@ -51,6 +52,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const body = (await res.json().catch(() => null)) as ApiErrorBody | null;
     throw new ApiError(res.status, body?.error ?? res.statusText);
   }
+  if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
 
@@ -85,4 +87,20 @@ export function getQuote(query: QuoteQuery, init?: RequestInit): Promise<Quote> 
 
 export function createBooking(input: CreateBookingInput): Promise<Booking> {
   return request("/bookings", { method: "POST", body: JSON.stringify(input) });
+}
+
+export function login(email: string, password: string): Promise<Admin> {
+  return request("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export function logout(): Promise<void> {
+  return request("/auth/logout", { method: "POST" });
+}
+
+// On the server, pass the session cookie in init.headers (see lib/admin-session.ts)
+export function getMe(init?: RequestInit): Promise<Admin> {
+  return request("/auth/me", init);
 }

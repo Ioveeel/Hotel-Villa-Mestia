@@ -26,6 +26,7 @@ Website + booking system for Villa Mestia Hotel, a small 9-room hotel in Mestia.
 - Keep code, file names, comments, and commit messages in English.
 - Before running a database migration, show me the generated SQL.
 - For any UI work in apps/web, follow apps/web/DESIGN.md.
+- Every admin page calls requireAdmin(). Every admin API route uses requireAuth.
 
 ## Commands
 

@@ -98,4 +98,11 @@ export type Booking = {
   status: BookingStatus;
 };
 
+// POST /auth/login, GET /auth/me
+export type Admin = {
+  id: number;
+  email: string;
+  name: string | null;
+};
+
 export type ApiErrorBody = { error: string };
