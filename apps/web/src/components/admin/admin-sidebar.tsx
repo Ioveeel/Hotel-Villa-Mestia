@@ -1,13 +1,20 @@
 import Link from "next/link";
-import { CalendarDays, ChartColumn, ClipboardList, Receipt } from "lucide-react";
+import {
+  CalendarDays,
+  ChartColumn,
+  ClipboardList,
+  Receipt,
+} from "lucide-react";
+import { AdminNavLink } from "./admin-nav-link";
 
-// Placeholder: sections are not built yet
-const sections = [
-  { label: "Calendar", icon: CalendarDays },
-  { label: "Bookings", icon: ClipboardList },
-  { label: "Expenses", icon: Receipt },
-  { label: "Reports", icon: ChartColumn },
-];
+// Sections without href are not built yet
+const sections: { label: string; icon: typeof CalendarDays; href?: string }[] =
+  [
+    { label: "Calendar", icon: CalendarDays, href: "/admin/calendar" },
+    { label: "Bookings", icon: ClipboardList },
+    { label: "Expenses", icon: Receipt },
+    { label: "Reports", icon: ChartColumn },
+  ];
 
 export function AdminSidebar() {
   return (
@@ -22,15 +29,22 @@ export function AdminSidebar() {
       </div>
       <nav aria-label="Admin" className="overflow-x-auto px-2 pb-2 md:pb-0">
         <ul className="flex gap-1 md:flex-col">
-          {sections.map(({ label, icon: Icon }) => (
+          {sections.map(({ label, icon: Icon, href }) => (
             <li key={label}>
-              <span
-                aria-disabled
-                className="flex h-11 items-center gap-3 rounded-lg px-3 whitespace-nowrap text-muted-foreground"
-              >
-                <Icon aria-hidden className="size-4.5" />
-                {label}
-              </span>
+              {href ? (
+                <AdminNavLink href={href}>
+                  <Icon aria-hidden className="size-4.5" />
+                  {label}
+                </AdminNavLink>
+              ) : (
+                <span
+                  aria-disabled
+                  className="flex h-11 items-center gap-3 rounded-lg px-3 whitespace-nowrap text-muted-foreground"
+                >
+                  <Icon aria-hidden className="size-4.5" />
+                  {label}
+                </span>
+              )}
             </li>
           ))}
         </ul>

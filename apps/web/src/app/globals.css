@@ -33,6 +33,12 @@
   --card: #fbfaf7;
   --input: #c9bfae;
   --destructive: #b3261e;
+  /* Admin calendar booking bars by source (all AA with --bar-foreground) */
+  --source-website: #2f4a3a;
+  --source-booking: #2b5a87;
+  --source-phone: #9e4f1b;
+  --source-walk-in: #5e6670;
+  --bar-foreground: #f7f5f0;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -51,6 +57,11 @@
     --card: #1d1b19;
     --input: #46413a;
     --destructive: #f2867a;
+    --source-website: #3b6650;
+    --source-booking: #33689a;
+    --source-phone: #a85622;
+    --source-walk-in: #5b6570;
+    --bar-foreground: #f7f5f0;
   }
 }
 
@@ -69,6 +80,11 @@
   --card: #1d1b19;
   --input: #46413a;
   --destructive: #f2867a;
+  --source-website: #3b6650;
+  --source-booking: #33689a;
+  --source-phone: #a85622;
+  --source-walk-in: #5b6570;
+  --bar-foreground: #f7f5f0;
 }
 
 /* shadcn aliases. Declared on every theme scope so nested .light/.dark re-resolve them. */
@@ -106,6 +122,11 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-destructive: var(--destructive);
+  --color-source-website: var(--source-website);
+  --color-source-booking: var(--source-booking);
+  --color-source-phone: var(--source-phone);
+  --color-source-walk-in: var(--source-walk-in);
+  --color-bar-foreground: var(--bar-foreground);
 
   /* Latin/Cyrillic face first, Georgian face catches Georgian glyphs */
   --font-sans: var(--font-noto-sans), var(--font-noto-sans-georgian), ui-sans-serif, system-ui, sans-serif;

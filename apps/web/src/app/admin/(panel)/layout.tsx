@@ -6,7 +6,7 @@ export default function AdminPanelLayout({ children }: LayoutProps<"/admin">) {
   return (
     <div className="flex flex-1 flex-col md:flex-row">
       <AdminSidebar />
-      <main className="flex-1 px-4 py-8 sm:px-8">{children}</main>
+      <main className="min-w-0 flex-1 px-4 py-8 sm:px-8">{children}</main>
     </div>
   );
 }

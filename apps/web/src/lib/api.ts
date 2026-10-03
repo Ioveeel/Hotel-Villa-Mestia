@@ -4,6 +4,7 @@ import type {
   Availability,
   AvailabilityQuery,
   Booking,
+  Calendar,
   CreateBookingInput,
   Quote,
   QuoteQuery,
@@ -103,4 +104,13 @@ export function logout(): Promise<void> {
 // On the server, pass the session cookie in init.headers (see lib/admin-session.ts)
 export function getMe(init?: RequestInit): Promise<Admin> {
   return request("/auth/me", init);
+}
+
+// Admin only: pass the session cookie in init.headers
+export function getCalendar(
+  query: { from: string; to: string },
+  init?: RequestInit,
+): Promise<Calendar> {
+  const params = new URLSearchParams(query);
+  return request(`/admin/calendar?${params}`, init);
 }

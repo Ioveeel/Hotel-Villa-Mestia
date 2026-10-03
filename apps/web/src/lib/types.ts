@@ -7,6 +7,10 @@ export type BookingStatus =
   | "checked_out"
   | "cancelled";
 
+export type BookingSource = "website" | "booking_com" | "phone" | "walk_in";
+
+export type PaymentMethod = "cash" | "card";
+
 // GET /room-types
 export type RoomType = {
   id: number;
@@ -103,6 +107,39 @@ export type Admin = {
   id: number;
   email: string;
   name: string | null;
+};
+
+// GET /admin/calendar. Range is [from, to); includes cancelled bookings.
+export type CalendarRoom = {
+  id: number;
+  number: number;
+  roomTypeName: string;
+  isActive: boolean;
+};
+
+export type CalendarBooking = {
+  id: number;
+  roomId: number;
+  checkIn: string;
+  checkOut: string;
+  status: BookingStatus;
+  source: BookingSource;
+  guestFirstName: string;
+  guestLastName: string;
+  adults: number;
+  children: number;
+  breakfast: boolean;
+  dinner: boolean;
+  totalPrice: number;
+  paidAt: string | null;
+  paymentMethod: PaymentMethod | null;
+};
+
+export type Calendar = {
+  from: string;
+  to: string;
+  rooms: CalendarRoom[];
+  bookings: CalendarBooking[];
 };
 
 export type ApiErrorBody = { error: string };

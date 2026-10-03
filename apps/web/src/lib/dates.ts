@@ -16,3 +16,14 @@ export function addDays(iso: string, days: number): string {
 export function isIsoDate(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value));
 }
+
+// Today in the hotel's time zone, independent of where the server runs
+export function hotelToday(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tbilisi" }).format(
+    new Date(),
+  );
+}
+
+export function daysBetween(from: string, to: string): number {
+  return Math.round((Date.parse(to) - Date.parse(from)) / 86_400_000);
+}
