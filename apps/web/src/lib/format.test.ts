@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  formatReportAmount,
+  formatPriceRounded,
   formatTetriAsGel,
   parseGelToTetri,
   roundToFiveTetri,
@@ -78,9 +78,11 @@ test("roundToFiveTetri: negative amounts round by magnitude", () => {
   assert.ok(Object.is(roundToFiveTetri(-1), 0));
 });
 
-test("formatReportAmount", () => {
-  assert.equal(formatReportAmount(12000), "120 ₾");
-  assert.equal(formatReportAmount(12053), "120.55 ₾");
-  assert.equal(formatReportAmount(123456789), "1,234,567.90 ₾");
-  assert.equal(formatReportAmount(-5003), "-50.05 ₾");
+test("formatPriceRounded", () => {
+  assert.equal(formatPriceRounded(12000), "120 ₾");
+  assert.equal(formatPriceRounded(12002), "120 ₾");
+  assert.equal(formatPriceRounded(12053), "120.55 ₾");
+  assert.equal(formatPriceRounded(12098), "121 ₾");
+  assert.equal(formatPriceRounded(-5003), "-50.05 ₾");
+  assert.equal(formatPriceRounded(-1), "0 ₾");
 });

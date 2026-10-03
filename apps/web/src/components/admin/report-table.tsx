@@ -1,4 +1,4 @@
-import { formatReportAmount } from "@/lib/format";
+import { formatPriceRounded } from "@/lib/format";
 import type { Report } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -80,15 +80,15 @@ export function ReportTable({
                     {day.occupancy}%
                   </span>
                 </td>
-                <td className={num}>{formatReportAmount(day.netRevenue)}</td>
-                <td className={num}>{formatReportAmount(day.expenses)}</td>
+                <td className={num}>{formatPriceRounded(day.netRevenue)}</td>
+                <td className={num}>{formatPriceRounded(day.expenses)}</td>
                 <td
                   className={cn(num, loss && "font-semibold text-destructive")}
                 >
-                  {formatReportAmount(day.profit)}
+                  {formatPriceRounded(day.profit)}
                 </td>
-                <td className={num}>{formatReportAmount(day.cashReceived)}</td>
-                <td className={num}>{formatReportAmount(day.cardReceived)}</td>
+                <td className={num}>{formatPriceRounded(day.cashReceived)}</td>
+                <td className={num}>{formatPriceRounded(day.cardReceived)}</td>
                 <td className={num}>{day.breakfastGuests}</td>
               </tr>
             );
@@ -101,13 +101,13 @@ export function ReportTable({
                 Total
               </th>
               <td className={num}>{totals.occupancy}%</td>
-              <td className={num}>{formatReportAmount(totals.netRevenue)}</td>
-              <td className={num}>{formatReportAmount(totals.expenses)}</td>
+              <td className={num}>{formatPriceRounded(totals.netRevenue)}</td>
+              <td className={num}>{formatPriceRounded(totals.expenses)}</td>
               <td className={cn(num, totals.profit < 0 && "text-destructive")}>
-                {formatReportAmount(totals.profit)}
+                {formatPriceRounded(totals.profit)}
               </td>
-              <td className={num}>{formatReportAmount(totals.cashReceived)}</td>
-              <td className={num}>{formatReportAmount(totals.cardReceived)}</td>
+              <td className={num}>{formatPriceRounded(totals.cashReceived)}</td>
+              <td className={num}>{formatPriceRounded(totals.cardReceived)}</td>
               <td className={num}>{totals.breakfastGuests}</td>
             </tr>
           </tfoot>

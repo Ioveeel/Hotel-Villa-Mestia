@@ -65,12 +65,7 @@ export function roundToFiveTetri(tetri: number): number {
   return tetri < 0 && rounded !== 0 ? -rounded : rounded;
 }
 
-// Exact report amount -> "1,234.55 ₾" (rounded to 5 tetri, grouped thousands)
-export function formatReportAmount(tetri: number): string {
-  const lari = roundToFiveTetri(tetri) / 100;
-  const amount = new Intl.NumberFormat("en-US", {
-    minimumFractionDigits: Number.isInteger(lari) ? 0 : 2,
-    maximumFractionDigits: 2,
-  }).format(lari);
-  return `${amount} ₾`;
+// Display only (reports, dashboard): formatPrice of the amount rounded to 5 tetri
+export function formatPriceRounded(tetri: number): string {
+  return formatPrice(roundToFiveTetri(tetri));
 }

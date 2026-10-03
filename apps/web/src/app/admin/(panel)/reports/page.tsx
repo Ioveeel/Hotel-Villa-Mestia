@@ -16,7 +16,7 @@ import {
   presetRange,
   type RangePreset,
 } from "@/lib/dates";
-import { formatDate, formatReportAmount } from "@/lib/format";
+import { formatDate, formatPriceRounded } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Reports" };
 
@@ -144,20 +144,20 @@ export default async function ReportsPage({
       <dl className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard
           label="Net revenue"
-          value={formatReportAmount(totals.netRevenue)}
+          value={formatPriceRounded(totals.netRevenue)}
           detail={
             totals.commission > 0
-              ? `${formatReportAmount(totals.commission)} commission`
+              ? `${formatPriceRounded(totals.commission)} commission`
               : undefined
           }
         />
         <StatCard
           label="Expenses"
-          value={formatReportAmount(totals.expenses)}
+          value={formatPriceRounded(totals.expenses)}
         />
         <StatCard
           label="Profit"
-          value={formatReportAmount(totals.profit)}
+          value={formatPriceRounded(totals.profit)}
           negative={totals.profit < 0}
         />
         <StatCard
@@ -167,11 +167,11 @@ export default async function ReportsPage({
         />
         <StatCard
           label="Cash"
-          value={formatReportAmount(totals.cashReceived)}
+          value={formatPriceRounded(totals.cashReceived)}
         />
         <StatCard
           label="Card"
-          value={formatReportAmount(totals.cardReceived)}
+          value={formatPriceRounded(totals.cardReceived)}
         />
       </dl>
 

@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { requireAdmin, sessionHeaders } from "@/lib/admin-session";
 import { getCalendar, getReport } from "@/lib/api";
 import { addDays, hotelToday } from "@/lib/dates";
-import { formatDate, formatPrice, formatReportAmount } from "@/lib/format";
+import { formatDate, formatPrice, formatPriceRounded } from "@/lib/format";
 import type { CalendarBooking } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -63,13 +63,13 @@ export default async function AdminHomePage() {
         />
         <StatCard
           label="Net revenue"
-          value={formatReportAmount(day.netRevenue)}
+          value={formatPriceRounded(day.netRevenue)}
           detail={`${day.occupiedRooms} of ${day.activeRooms} rooms tonight`}
         />
-        <StatCard label="Expenses" value={formatReportAmount(day.expenses)} />
+        <StatCard label="Expenses" value={formatPriceRounded(day.expenses)} />
         <StatCard
           label="Profit"
-          value={formatReportAmount(day.profit)}
+          value={formatPriceRounded(day.profit)}
           negative={day.profit < 0}
         />
       </dl>

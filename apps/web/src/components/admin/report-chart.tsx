@@ -12,7 +12,7 @@ import {
   PointElement,
   Tooltip,
 } from "chart.js";
-import { formatDate, formatReportAmount } from "@/lib/format";
+import { formatDate, formatPriceRounded } from "@/lib/format";
 import type { ReportDay } from "@/lib/types";
 
 // Only the pieces this chart uses, so the rest of Chart.js is tree-shaken
@@ -168,7 +168,7 @@ export function ReportChart({ days }: { days: ReportDay[] }) {
                 const key =
                   series.find((s) => s.label === item.dataset.label)?.key ??
                   "profit";
-                return ` ${item.dataset.label}: ${formatReportAmount(day[key])}`;
+                return ` ${item.dataset.label}: ${formatPriceRounded(day[key])}`;
               },
             },
           },
