@@ -45,6 +45,8 @@ Website + booking system for Villa Mestia Hotel, a small 9-room hotel in Mestia.
   - "Double Room with Garden View" (Booking Room ID 89986707) = Double
   - Triple, Quadruple: to be added
 - Channel manager integration planned later (before public launch).
+- Times (hotel time): check-in from 14:00, check-out until 12:00,
+  breakfast 08:00–10:00, dinner 19:00–20:00
 
 ## Business rules
 
@@ -88,3 +90,14 @@ Website + booking system for Villa Mestia Hotel, a small 9-room hotel in Mestia.
   at deployment, depends on hosting (reverse proxy / platform headers / direct API calls).
   real hotel texts (home page copy is placeholder, may contain invented facts).
   structured validation errors from API ({ path, message }), shared zod schemas in packages/shared
+- Reports:
+  - all "days" are in hotel time (Asia/Tbilisi), including grouping by paid_at
+  - per-night revenue = net_total split across nights in whole tetri;
+    the remainder goes to the first nights, so the nights always sum to net_total exactly
+  - occupancy = rooms with a non-cancelled booking that night / active rooms
+  - cash / card received = bookings paid on that day (by paid_at in hotel time)
+  - breakfast is served on the mornings from check_in + 1 to check_out (inclusive),
+    dinner on the evenings from check_in to check_out - 1
+  - report amounts are calculated exactly and rounded to the nearest 5 tetri
+    only when displayed (last digit 0-2 -> 0, 3-7 -> 5, 8-9 -> next 10).
+    Booking prices and stored amounts are never rounded.

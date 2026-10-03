@@ -4,6 +4,7 @@ import { adminBookingsRouter } from "./bookings.js";
 import { calendarRouter } from "./calendar.js";
 import { adminExpensesRouter } from "./expenses.js";
 import { adminGuestsRouter } from "./guests.js";
+import { adminReportsRouter } from "./reports.js";
 import { adminRoomsRouter } from "./rooms.js";
 
 export const adminRouter = Router();
@@ -16,3 +17,4 @@ adminRouter.use("/bookings", adminBookingsRouter);
 adminRouter.use("/rooms", adminRoomsRouter);
 adminRouter.use("/guests", adminGuestsRouter);
 adminRouter.use("/expenses", adminExpensesRouter);
+adminRouter.use("/reports", adminReportsRouter);
