@@ -17,7 +17,7 @@ export function parseInput<T extends z.ZodType>(
 }
 
 // Postgres serial (int4) max
-const MAX_ID = 2_147_483_647;
+export const MAX_ID = 2_147_483_647;
 
 // Route param ":id" as a positive integer
 export const idParams = z.object({

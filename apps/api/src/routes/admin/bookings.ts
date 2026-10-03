@@ -1,8 +1,29 @@
-import { and, eq, isNull, ne } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gt,
+  ilike,
+  isNotNull,
+  isNull,
+  lte,
+  ne,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import { Router } from "express";
 import { z } from "zod";
 import { db } from "../../db/index.js";
-import { bookings, guests, rooms, roomTypes } from "../../db/schema.js";
+import {
+  bookingSource,
+  bookingStatus,
+  bookings,
+  guests,
+  rooms,
+  roomTypes,
+} from "../../db/schema.js";
 import { nightsBetween } from "../../lib/dates.js";
 import { isNoOverlapViolation } from "../../lib/dbErrors.js";
 import {
@@ -13,7 +34,7 @@ import {
 } from "../../lib/guestInput.js";
 import { calculateAdminPrice } from "../../lib/pricing.js";
 import { checkStayDates, stayFields } from "../../lib/stayInput.js";
-import { idParams, parseInput } from "../../lib/validation.js";
+import { idParams, MAX_ID, parseInput } from "../../lib/validation.js";
 import { HttpError } from "../../middleware/errorHandler.js";
 
 // Admin may enter stays that already started (e.g. late Booking.com entries)
@@ -97,6 +118,138 @@ async function priceBooking(body: PreviewBody) {
 }
 
 export const adminBookingsRouter = Router();
+
+const pageNumber = (name: string, max: number) =>
+  z
+    .string()
+    .regex(/^[1-9][0-9]{0,5}$/, `${name} must be a positive whole number`)
+    .transform(Number)
+    .refine((n) => n <= max, `${name} cannot be more than ${max}`);
+
+// All filters optional. from/to are inclusive days: a stay matches if it has a night in [from, to].
+const listQuery = z
+  .object({
+    q: z
+      .string({ error: "q must be a string" })
+      .trim()
+      .max(100, "q is too long")
+      .optional(),
+    status: z
+      .enum(bookingStatus.enumValues, {
+        error: `status must be one of: ${bookingStatus.enumValues.join(", ")}`,
+      })
+      .optional(),
+    source: z
+      .enum(bookingSource.enumValues, {
+        error: `source must be one of: ${bookingSource.enumValues.join(", ")}`,
+      })
+      .optional(),
+    from: z.iso
+      .date({ error: "from must be a valid date (YYYY-MM-DD)" })
+      .optional(),
+    to: z.iso.date({ error: "to must be a valid date (YYYY-MM-DD)" }).optional(),
+    paid: z
+      .enum(["true", "false"], { error: "paid must be true or false" })
+      .transform((v) => v === "true")
+      .optional(),
+    page: pageNumber("page", 100_000).default(1),
+    pageSize: pageNumber("pageSize", 100).default(25),
+  })
+  .check((ctx) => {
+    if (ctx.issues.length > 0) return;
+    const { from, to } = ctx.value;
+    if (from && to && to < from) {
+      ctx.issues.push({
+        code: "custom",
+        input: to,
+        path: ["to"],
+        message: "to cannot be before from",
+      });
+    }
+  });
+
+// Escapes LIKE wildcards so user input matches literally
+function escapeLike(s: string) {
+  return s.replace(/[\\%_]/g, "\\$&");
+}
+
+function searchCondition(q: string): SQL | undefined {
+  const pattern = `%${escapeLike(q)}%`;
+  const conditions: (SQL | undefined)[] = [
+    ilike(guests.firstName, pattern),
+    ilike(guests.lastName, pattern),
+    // "John Smith"
+    sql`(${guests.firstName} || ' ' || ${guests.lastName}) ILIKE ${pattern}`,
+    ilike(guests.phone, pattern),
+    ilike(guests.email, pattern),
+  ];
+  if (/^[0-9]{1,10}$/.test(q) && Number(q) <= MAX_ID) {
+    conditions.push(eq(bookings.id, Number(q)));
+  }
+  return or(...conditions);
+}
+
+// Booking list for admin, newest check-in first. Amounts in tetri.
+adminBookingsRouter.get("/", async (req, res) => {
+  const query = parseInput(listQuery, req.query);
+
+  const where = and(
+    query.q ? searchCondition(query.q) : undefined,
+    query.status ? eq(bookings.status, query.status) : undefined,
+    query.source ? eq(bookings.source, query.source) : undefined,
+    query.to ? lte(bookings.checkIn, query.to) : undefined,
+    query.from ? gt(bookings.checkOut, query.from) : undefined,
+    query.paid === undefined
+      ? undefined
+      : query.paid
+        ? isNotNull(bookings.paidAt)
+        : isNull(bookings.paidAt),
+  );
+
+  const [rows, [totalRow]] = await Promise.all([
+    db
+      .select({
+        id: bookings.id,
+        roomNumber: rooms.number,
+        roomTypeName: roomTypes.name,
+        guestFirstName: guests.firstName,
+        guestLastName: guests.lastName,
+        phone: guests.phone,
+        checkIn: bookings.checkIn,
+        checkOut: bookings.checkOut,
+        source: bookings.source,
+        status: bookings.status,
+        totalPrice: bookings.totalPrice,
+        netTotal: bookings.netTotal,
+        paidAt: bookings.paidAt,
+        paymentMethod: bookings.paymentMethod,
+      })
+      .from(bookings)
+      .innerJoin(rooms, eq(rooms.id, bookings.roomId))
+      .innerJoin(roomTypes, eq(roomTypes.id, rooms.roomTypeId))
+      .innerJoin(guests, eq(guests.id, bookings.guestId))
+      .where(where)
+      .orderBy(desc(bookings.checkIn), desc(bookings.id))
+      .limit(query.pageSize)
+      .offset((query.page - 1) * query.pageSize),
+    db
+      .select({ total: count() })
+      .from(bookings)
+      .innerJoin(guests, eq(guests.id, bookings.guestId))
+      .where(where),
+  ]);
+
+  res.json({
+    items: rows.map(({ guestFirstName, guestLastName, ...row }) => ({
+      ...row,
+      guestName: `${guestFirstName} ${guestLastName}`,
+      nights: nightsBetween(row.checkIn, row.checkOut),
+    })),
+    total: totalRow!.total,
+    page: query.page,
+    pageSize: query.pageSize,
+  });
+});
 
 adminBookingsRouter.post("/preview", async (req, res) => {
   const body = parseInput(previewBody, req.body);
