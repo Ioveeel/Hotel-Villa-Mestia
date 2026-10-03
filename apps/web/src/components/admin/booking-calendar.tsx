@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Circle, CircleCheck, Plus } from "lucide-react";
+import { BookingBarLink } from "@/components/admin/booking-bar-link";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { addDays, daysBetween } from "@/lib/dates";
 import { formatDate } from "@/lib/format";
 import type { BookingSource, Calendar, CalendarBooking } from "@/lib/types";
@@ -68,18 +70,26 @@ function BookingBar({
   const name = `${booking.guestFirstName} ${booking.guestLastName}`;
   const PaidIcon = paid ? CircleCheck : Circle;
 
+  const status = booking.status.replace("_", " ");
+
   return (
-    <div
-      title={[
-        name,
-        `${formatDate(booking.checkIn)} → ${formatDate(booking.checkOut)}`,
-        source.label,
-        booking.status.replace("_", " "),
-        paid ? "Paid" : "Unpaid",
-      ].join(" · ")}
+    <BookingBarLink
+      href={`?from=${from}&booking=${booking.id}`}
+      aria-label={`${name}, ${status}, ${paid ? "paid" : "unpaid"}. Open booking #${booking.id}`}
+      tooltip={
+        <>
+          <span className="block text-sm font-semibold">{name}</span>
+          <span className="block">
+            {formatDate(booking.checkIn)} → {formatDate(booking.checkOut)}
+          </span>
+          <span className="block capitalize opacity-80">
+            {[source.label, status, paid ? "paid" : "unpaid"].join(" · ")}
+          </span>
+        </>
+      }
       style={{ gridColumn: `${start + 1} / ${end + 1}`, gridRow: lane + 1 }}
       className={cn(
-        "z-10 mx-0.5 my-1 flex min-w-0 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-bar-foreground shadow-sm shadow-foreground/10",
+        "z-10 mx-0.5 my-1 flex min-w-0 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-bar-foreground shadow-sm shadow-foreground/10 transition-[filter,box-shadow] duration-150 outline-none hover:brightness-110 hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-offset-1",
         source.className,
         booking.checkIn < from && "-ml-px rounded-l-none",
         daysBetween(from, booking.checkOut) > dayCount &&
@@ -88,12 +98,10 @@ function BookingBar({
       )}
     >
       <PaidIcon aria-hidden className="size-3.5 shrink-0" />
-      <span className="sr-only">{paid ? "Paid:" : "Unpaid:"}</span>
       <span className={cn("truncate", cancelled && "line-through")}>
         {name}
       </span>
-      {cancelled && <span className="sr-only">(cancelled)</span>}
-    </div>
+    </BookingBarLink>
   );
 }
 
@@ -166,6 +174,7 @@ export function BookingCalendar({
           </div>
         </div>
 
+        <TooltipProvider>
         {rooms.map((room) => {
           const roomBookings = bookings.filter((b) => b.roomId === room.id);
           const lanes = assignLanes(roomBookings);
@@ -248,6 +257,7 @@ export function BookingCalendar({
             </div>
           );
         })}
+        </TooltipProvider>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { BookingPanel } from "@/components/admin/booking-panel";
 import {
   BookingCalendar,
   CalendarLegend,
@@ -90,6 +91,7 @@ export default async function CalendarPage({
 
       <CalendarLegend />
       <BookingCalendar calendar={calendar} today={today} />
+      <BookingPanel />
     </div>
   );
 }

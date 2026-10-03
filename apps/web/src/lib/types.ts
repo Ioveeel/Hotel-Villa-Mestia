@@ -203,3 +203,48 @@ export type AdminBooking = {
   source: BookingSource;
   totalPrice: number;
 };
+
+// GET /admin/bookings/:id (also returned by pay, unpay, cancel). Admin only.
+export type AdminGuest = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  phone: string | null;
+  email: string | null;
+  country: string | null;
+  documentNumber: string | null;
+  notes: string | null;
+};
+
+export type AdminBookingDetails = {
+  id: number;
+  roomId: number;
+  guestId: number;
+  roomNumber: number;
+  roomTypeName: string;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  adults: number;
+  children: number;
+  status: BookingStatus;
+  source: BookingSource;
+  externalRef: string | null;
+  breakfast: boolean;
+  dinner: boolean;
+  roomPricePerNight: number | null;
+  breakfastPrice: number;
+  dinnerPrice: number;
+  // Basis points (23% = 2300)
+  commissionRateBp: number;
+  roomTotal: number;
+  mealsTotal: number;
+  totalPrice: number;
+  commissionAmount: number;
+  netTotal: number;
+  paymentMethod: PaymentMethod | null;
+  paidAt: string | null;
+  notes: string | null;
+  createdAt: string;
+  guest: AdminGuest;
+};

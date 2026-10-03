@@ -26,3 +26,15 @@ export function parseGelToTetri(input: string): number | null {
   const [, lari, tetri = ""] = match;
   return Number(lari + tetri.padEnd(2, "0"));
 }
+
+// "2026-10-03T12:04:53Z" -> "3 Oct 2026, 16:04" (hotel time)
+export function formatDateTime(iso: string): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Tbilisi",
+  }).format(new Date(iso));
+}

@@ -1,6 +1,8 @@
 import type {
   Admin,
   AdminBooking,
+  AdminBookingDetails,
+  AdminGuest,
   AdminBookingPreview,
   AdminBookingPreviewInput,
   AdminRoom,
@@ -11,6 +13,7 @@ import type {
   Calendar,
   CreateAdminBookingInput,
   CreateBookingInput,
+  PaymentMethod,
   Quote,
   QuoteQuery,
   RoomType,
@@ -145,5 +148,41 @@ export function createAdminBooking(
   return request("/admin/bookings", {
     method: "POST",
     body: JSON.stringify(input),
+  });
+}
+
+export function getAdminBooking(
+  id: number,
+  init?: RequestInit,
+): Promise<AdminBookingDetails> {
+  return request(`/admin/bookings/${id}`, init);
+}
+
+export function markBookingPaid(
+  id: number,
+  method: PaymentMethod,
+): Promise<AdminBookingDetails> {
+  return request(`/admin/bookings/${id}/pay`, {
+    method: "POST",
+    body: JSON.stringify({ method }),
+  });
+}
+
+export function undoBookingPayment(id: number): Promise<AdminBookingDetails> {
+  return request(`/admin/bookings/${id}/unpay`, { method: "POST" });
+}
+
+export function cancelBooking(id: number): Promise<AdminBookingDetails> {
+  return request(`/admin/bookings/${id}/cancel`, { method: "POST" });
+}
+
+// null clears the document number
+export function updateGuestDocument(
+  guestId: number,
+  documentNumber: string | null,
+): Promise<AdminGuest> {
+  return request(`/admin/guests/${guestId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ documentNumber }),
   });
 }
