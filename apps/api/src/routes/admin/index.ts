@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth } from "../../middleware/requireAuth.js";
 import { adminBookingsRouter } from "./bookings.js";
 import { calendarRouter } from "./calendar.js";
+import { adminExpensesRouter } from "./expenses.js";
 import { adminGuestsRouter } from "./guests.js";
 import { adminRoomsRouter } from "./rooms.js";
 
@@ -14,3 +15,4 @@ adminRouter.use("/calendar", calendarRouter);
 adminRouter.use("/bookings", adminBookingsRouter);
 adminRouter.use("/rooms", adminRoomsRouter);
 adminRouter.use("/guests", adminGuestsRouter);
+adminRouter.use("/expenses", adminExpensesRouter);
