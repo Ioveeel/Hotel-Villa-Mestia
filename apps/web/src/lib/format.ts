@@ -15,3 +15,14 @@ export function formatDate(iso: string): string {
     timeZone: "UTC",
   }).format(new Date(`${iso}T00:00:00Z`));
 }
+
+const GEL_PATTERN = /^(\d{1,7})(?:[.,](\d{1,2}))?$/;
+
+// "220" -> 22000, "220.5" -> 22050, "220,50" -> 22050. null when invalid.
+// String math only: floats can't represent most decimals exactly.
+export function parseGelToTetri(input: string): number | null {
+  const match = GEL_PATTERN.exec(input.trim());
+  if (!match) return null;
+  const [, lari, tetri = ""] = match;
+  return Number(lari + tetri.padEnd(2, "0"));
+}

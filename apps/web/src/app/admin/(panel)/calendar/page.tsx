@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import {
   BookingCalendar,
   CalendarLegend,
@@ -57,27 +57,35 @@ export default async function CalendarPage({
             {shortDate(from)} – {shortDate(addDays(to, -1))}
           </p>
         </div>
-        <nav aria-label="Calendar range" className="flex items-center gap-2">
-          <Button asChild variant="outline" size="icon">
-            <Link
-              href={`/admin/calendar?from=${addDays(from, -STEP_DAYS)}`}
-              aria-label="Previous 2 weeks"
-            >
-              <ChevronLeft aria-hidden />
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild>
+            <Link href="/admin/bookings/new">
+              <Plus aria-hidden />
+              New booking
             </Link>
           </Button>
-          <Button asChild variant="outline">
-            <Link href="/admin/calendar">Today</Link>
-          </Button>
-          <Button asChild variant="outline" size="icon">
-            <Link
-              href={`/admin/calendar?from=${addDays(from, STEP_DAYS)}`}
-              aria-label="Next 2 weeks"
-            >
-              <ChevronRight aria-hidden />
-            </Link>
-          </Button>
-        </nav>
+          <nav aria-label="Calendar range" className="flex items-center gap-2">
+            <Button asChild variant="outline" size="icon">
+              <Link
+                href={`/admin/calendar?from=${addDays(from, -STEP_DAYS)}`}
+                aria-label="Previous 2 weeks"
+              >
+                <ChevronLeft aria-hidden />
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/admin/calendar">Today</Link>
+            </Button>
+            <Button asChild variant="outline" size="icon">
+              <Link
+                href={`/admin/calendar?from=${addDays(from, STEP_DAYS)}`}
+                aria-label="Next 2 weeks"
+              >
+                <ChevronRight aria-hidden />
+              </Link>
+            </Button>
+          </nav>
+        </div>
       </div>
 
       <CalendarLegend />

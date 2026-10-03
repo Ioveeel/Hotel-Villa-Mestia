@@ -1,10 +1,15 @@
 import type {
   Admin,
+  AdminBooking,
+  AdminBookingPreview,
+  AdminBookingPreviewInput,
+  AdminRoom,
   ApiErrorBody,
   Availability,
   AvailabilityQuery,
   Booking,
   Calendar,
+  CreateAdminBookingInput,
   CreateBookingInput,
   Quote,
   QuoteQuery,
@@ -25,12 +30,14 @@ const fieldLabels: Record<string, string> = {
   checkOut: "Check-out",
   firstName: "First name",
   lastName: "Last name",
+  roomTotal: "Booking.com amount",
+  documentNumber: "Document number",
 };
 
 // API messages start with the field name ("checkIn cannot be in the past")
 export function humanizeApiMessage(message: string): string {
   const text = message.replace(
-    /\b(checkIn|checkOut|firstName|lastName)\b/g,
+    /\b(checkIn|checkOut|firstName|lastName|roomTotal|documentNumber)\b/g,
     (key) => fieldLabels[key],
   );
   return text.charAt(0).toUpperCase() + text.slice(1);
@@ -113,4 +120,30 @@ export function getCalendar(
 ): Promise<Calendar> {
   const params = new URLSearchParams(query);
   return request(`/admin/calendar?${params}`, init);
+}
+
+// Admin only: pass the session cookie in init.headers
+export function getAdminRooms(init?: RequestInit): Promise<AdminRoom[]> {
+  return request("/admin/rooms", init);
+}
+
+// Admin only, from the browser (session cookie is sent automatically)
+export function previewAdminBooking(
+  input: AdminBookingPreviewInput,
+  init?: RequestInit,
+): Promise<AdminBookingPreview> {
+  return request("/admin/bookings/preview", {
+    ...init,
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function createAdminBooking(
+  input: CreateAdminBookingInput,
+): Promise<AdminBooking> {
+  return request("/admin/bookings", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 }

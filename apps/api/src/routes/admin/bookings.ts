@@ -30,43 +30,57 @@ const adminGuestBody = z.strictObject(
 
 const { roomTypeId: _roomTypeId, ...stay } = stayFields("body");
 
-const adminBookingBody = z
-  .object({
-    source: z.enum(["booking_com", "phone", "walk_in"], {
-      error: "source must be booking_com, phone or walk_in",
-    }),
-    roomId: z
-      .number({ error: "roomId must be a number" })
-      .int("roomId must be a whole number")
-      .positive("roomId must be positive"),
-    ...stay,
-    notes: trimmed("notes", 1000).optional(),
-    // In tetri. Required for booking_com, ignored for other sources.
-    roomTotal: z
-      .number({ error: "roomTotal must be a number" })
-      .int("roomTotal must be a whole number (tetri)")
-      .positive("roomTotal must be positive")
-      .max(100_000_000, "roomTotal is too large")
-      .optional(),
-    guest: adminGuestBody,
-  })
-  .check((ctx) => {
-    if (ctx.issues.length > 0) return;
-    if (ctx.value.source === "booking_com" && ctx.value.roomTotal === undefined) {
-      ctx.issues.push({
-        code: "custom",
-        input: undefined,
-        path: ["roomTotal"],
-        message: "roomTotal is required for booking_com",
-      });
-    }
-  })
-  .check((ctx) => checkStayDates(ctx, ADMIN_PAST_DAYS));
+const bookingFields = {
+  source: z.enum(["booking_com", "phone", "walk_in"], {
+    error: "source must be booking_com, phone or walk_in",
+  }),
+  roomId: z
+    .number({ error: "roomId must be a number" })
+    .int("roomId must be a whole number")
+    .positive("roomId must be positive"),
+  ...stay,
+  notes: trimmed("notes", 1000).optional(),
+  // In tetri. Required for booking_com, ignored for other sources.
+  roomTotal: z
+    .number({ error: "roomTotal must be a number" })
+    .int("roomTotal must be a whole number (tetri)")
+    .positive("roomTotal must be positive")
+    .max(100_000_000, "roomTotal is too large")
+    .optional(),
+};
 
-type AdminBookingBody = z.infer<typeof adminBookingBody>;
+// Cross-field rules, for use in .check()
+function checkBookingRules(ctx: {
+  issues: z.core.$ZodRawIssue[];
+  value: {
+    source: string;
+    roomTotal?: number;
+    checkIn: string;
+    checkOut: string;
+  };
+}) {
+  if (ctx.issues.length > 0) return;
+  if (ctx.value.source === "booking_com" && ctx.value.roomTotal === undefined) {
+    ctx.issues.push({
+      code: "custom",
+      input: undefined,
+      path: ["roomTotal"],
+      message: "roomTotal is required for booking_com",
+    });
+  }
+  checkStayDates(ctx, ADMIN_PAST_DAYS);
+}
 
-function parseBody(input: unknown): AdminBookingBody {
-  const parsed = adminBookingBody.safeParse(input);
+// Preview takes the same fields without the guest, so it works before names are entered
+const previewBody = z.object(bookingFields).check(checkBookingRules);
+const createBody = z
+  .object({ ...bookingFields, guest: adminGuestBody })
+  .check(checkBookingRules);
+
+type PreviewBody = z.infer<typeof previewBody>;
+
+function parseBody<T extends z.ZodType>(schema: T, input: unknown): z.infer<T> {
+  const parsed = schema.safeParse(input);
   if (!parsed.success) {
     throw new HttpError(
       400,
@@ -77,7 +91,7 @@ function parseBody(input: unknown): AdminBookingBody {
 }
 
 // Validates the room and calculates prices. Writes nothing.
-async function priceBooking(body: AdminBookingBody) {
+async function priceBooking(body: PreviewBody) {
   const [room] = await db.select().from(rooms).where(eq(rooms.id, body.roomId));
   if (!room) throw new HttpError(404, "Room not found");
   if (!room.isActive) throw new HttpError(400, "Room is not active");
@@ -95,7 +109,7 @@ async function priceBooking(body: AdminBookingBody) {
 export const adminBookingsRouter = Router();
 
 adminBookingsRouter.post("/preview", async (req, res) => {
-  const body = parseBody(req.body);
+  const body = parseBody(previewBody, req.body);
   const { nights, price } = await priceBooking(body);
 
   // In tetri
@@ -111,7 +125,7 @@ adminBookingsRouter.post("/preview", async (req, res) => {
 });
 
 adminBookingsRouter.post("/", async (req, res) => {
-  const body = parseBody(req.body);
+  const body = parseBody(createBody, req.body);
   const { room, nights, price } = await priceBooking(body);
 
   try {

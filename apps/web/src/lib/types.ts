@@ -143,3 +143,63 @@ export type Calendar = {
 };
 
 export type ApiErrorBody = { error: string };
+
+// GET /admin/rooms
+export type AdminRoom = {
+  id: number;
+  number: number;
+  roomTypeName: string;
+  maxGuests: number;
+  isActive: boolean;
+};
+
+export type AdminBookingSource = Exclude<BookingSource, "website">;
+
+// POST /admin/bookings/preview request (POST /admin/bookings adds guest)
+export type AdminBookingPreviewInput = {
+  source: AdminBookingSource;
+  roomId: number;
+  checkIn: string;
+  checkOut: string;
+  adults: number;
+  children: number;
+  breakfast: boolean;
+  dinner: boolean;
+  notes?: string;
+  // Required for booking_com, ignored otherwise
+  roomTotal?: number;
+};
+
+export type CreateAdminBookingInput = AdminBookingPreviewInput & {
+  guest: {
+    firstName: string;
+    lastName: string;
+    phone?: string;
+    email?: string;
+    country?: string;
+    documentNumber?: string;
+  };
+};
+
+// POST /admin/bookings/preview response
+export type AdminBookingPreview = {
+  nights: number;
+  roomTotal: number;
+  mealsTotal: number;
+  totalPrice: number;
+  // Basis points (23% = 2300)
+  commissionRate: number;
+  commissionAmount: number;
+  netTotal: number;
+};
+
+// POST /admin/bookings response (fields used by the web)
+export type AdminBooking = {
+  id: number;
+  roomId: number;
+  checkIn: string;
+  checkOut: string;
+  status: BookingStatus;
+  source: BookingSource;
+  totalPrice: number;
+};

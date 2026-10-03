@@ -1,4 +1,5 @@
-import { Circle, CircleCheck } from "lucide-react";
+import Link from "next/link";
+import { Circle, CircleCheck, Plus } from "lucide-react";
 import { addDays, daysBetween } from "@/lib/dates";
 import { formatDate } from "@/lib/format";
 import type { BookingSource, Calendar, CalendarBooking } from "@/lib/types";
@@ -166,9 +167,8 @@ export function BookingCalendar({
         </div>
 
         {rooms.map((room) => {
-          const lanes = assignLanes(
-            bookings.filter((b) => b.roomId === room.id),
-          );
+          const roomBookings = bookings.filter((b) => b.roomId === room.id);
+          const lanes = assignLanes(roomBookings);
           const laneCount = Math.max(1, ...lanes.map((l) => l.lane + 1));
           return (
             <div
@@ -196,18 +196,45 @@ export function BookingCalendar({
                   gridTemplateRows: `repeat(${laneCount}, 2.5rem)`,
                 }}
               >
-                {days.map((day, i) => (
-                  <div
-                    key={day}
-                    style={{ gridColumn: i + 1, gridRow: "1 / -1" }}
-                    className={cn(
-                      "border-l border-border/60 first:border-l-0",
-                      dayParts(day).isWeekend && "bg-surface/50",
-                      day === today && "bg-glacier/30",
-                      !room.isActive && "bg-surface",
-                    )}
-                  />
-                ))}
+                {days.map((day, i) => {
+                  const className = cn(
+                    "border-l border-border/60 first:border-l-0",
+                    dayParts(day).isWeekend && "bg-surface/50",
+                    day === today && "bg-glacier/30",
+                    !room.isActive && "bg-surface",
+                  );
+                  const style = { gridColumn: i + 1, gridRow: "1 / -1" };
+                  const free =
+                    room.isActive &&
+                    !roomBookings.some(
+                      (b) =>
+                        b.status !== "cancelled" &&
+                        b.checkIn <= day &&
+                        day < b.checkOut,
+                    );
+                  if (!free) {
+                    return <div key={day} style={style} className={className} />;
+                  }
+                  // Out of the tab order (9 rooms × 31 days); keyboard users have the "New booking" button
+                  return (
+                    <Link
+                      key={day}
+                      href={`/admin/bookings/new?room=${room.id}&checkIn=${day}`}
+                      tabIndex={-1}
+                      aria-label={`New booking: Room ${room.number}, ${formatDate(day)}`}
+                      style={style}
+                      className={cn(
+                        className,
+                        "group flex items-center justify-center transition-colors duration-150 hover:bg-primary/10",
+                      )}
+                    >
+                      <Plus
+                        aria-hidden
+                        className="size-4 text-primary opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                      />
+                    </Link>
+                  );
+                })}
                 {lanes.map(({ booking, lane }) => (
                   <BookingBar
                     key={booking.id}
