@@ -27,14 +27,17 @@ export function stayFields(source: "body" | "query") {
 }
 
 // Cross-field date rules, for use in .check()
-export function checkStayDates(ctx: {
-  issues: z.core.$ZodRawIssue[];
-  value: { checkIn: string; checkOut: string };
-}) {
+export function checkStayDates(
+  ctx: {
+    issues: z.core.$ZodRawIssue[];
+    value: { checkIn: string; checkOut: string };
+  },
+  pastDaysAllowed = 0,
+) {
   // Cross-field checks only make sense when every field is valid
   if (ctx.issues.length > 0) return;
   const { checkIn, checkOut } = ctx.value;
-  for (const issue of stayDatesIssues(checkIn, checkOut)) {
+  for (const issue of stayDatesIssues(checkIn, checkOut, pastDaysAllowed)) {
     ctx.issues.push({
       code: "custom",
       input: ctx.value[issue.path],

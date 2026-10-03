@@ -4,53 +4,19 @@ import { z } from "zod";
 import { db } from "../db/index.js";
 import { bookings, guests, rooms } from "../db/schema.js";
 import { nightsBetween } from "../lib/dates.js";
+import { isNoOverlapViolation } from "../lib/dbErrors.js";
+import { guestFields, guestObjectError } from "../lib/guestInput.js";
 import { calculatePrice } from "../lib/pricing.js";
 import { checkStayDates, stayFields } from "../lib/stayInput.js";
 import { HttpError } from "../middleware/errorHandler.js";
 import { bookingRateLimit } from "../middleware/rateLimit.js";
 
-const trimmed = (field: string, max: number) =>
-  z
-    .string({ error: `${field} must be a string` })
-    .trim()
-    .min(1, `${field} is required`)
-    .max(max, `${field} must be at most ${max} characters`);
-
 // documentNumber is added by admin at check-in, never accepted here.
-const guestBody = z.strictObject(
-  {
-    firstName: trimmed("firstName", 100),
-    lastName: trimmed("lastName", 100),
-    phone: z
-      .string({ error: "phone is required" })
-      .trim()
-      .regex(
-        /^[0-9 +]{7,20}$/,
-        "phone must be 7-20 characters: digits, spaces and + only",
-      ),
-    email: z.email("email must be a valid email address").optional(),
-    country: trimmed("country", 100).optional(),
-  },
-  {
-    error: (issue) =>
-      issue.code === "unrecognized_keys"
-        ? "guest contains unknown fields"
-        : "guest is required",
-  },
-);
+const guestBody = z.strictObject(guestFields, { error: guestObjectError });
 
 const createBookingBody = z
   .object({ ...stayFields("body"), guest: guestBody })
   .check(checkStayDates);
-
-const NO_OVERLAP_CONSTRAINT = "bookings_no_overlap";
-
-// drizzle wraps driver errors; the pg error is in `cause`
-function isNoOverlapViolation(err: unknown): boolean {
-  const pgErr = (err as { cause?: unknown })?.cause ?? err;
-  const { code, constraint } = pgErr as { code?: string; constraint?: string };
-  return code === "23P01" && constraint === NO_OVERLAP_CONSTRAINT;
-}
 
 export const bookingsRouter = Router();
 

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { requireAuth } from "../../middleware/requireAuth.js";
+import { adminBookingsRouter } from "./bookings.js";
 import { calendarRouter } from "./calendar.js";
 
 export const adminRouter = Router();
@@ -8,3 +9,4 @@ export const adminRouter = Router();
 adminRouter.use(requireAuth);
 
 adminRouter.use("/calendar", calendarRouter);
+adminRouter.use("/bookings", adminBookingsRouter);

@@ -1,7 +1,8 @@
-import { eq } from "drizzle-orm";
+import { and, desc, eq, lte } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { mealOptions, roomTypes } from "../db/schema.js";
+import { commissionRates, mealOptions, roomTypes } from "../db/schema.js";
 import { HttpError } from "../middleware/errorHandler.js";
+import { todayInHotel } from "./dates.js";
 
 export type PriceInput = {
   roomTypeId: number;
@@ -71,5 +72,67 @@ export async function calculatePrice(input: PriceInput) {
     roomTotal,
     mealsTotal,
     totalPrice: roomTotal + mealsTotal,
+  };
+}
+
+type BookingSource = (typeof commissionRates.$inferSelect)["source"];
+
+// Current rate: the row with the latest valid_from <= today, in basis points
+export async function currentCommissionRateBp(
+  source: BookingSource,
+): Promise<number> {
+  const [rate] = await db
+    .select({ rateBp: commissionRates.rateBp })
+    .from(commissionRates)
+    .where(
+      and(
+        eq(commissionRates.source, source),
+        lte(commissionRates.validFrom, todayInHotel()),
+      ),
+    )
+    .orderBy(desc(commissionRates.validFrom))
+    .limit(1);
+  if (!rate) throw new Error(`No commission rate for source ${source}`);
+  return rate.rateBp;
+}
+
+export type AdminPriceInput = PriceInput &
+  (
+    | { source: "booking_com"; roomTotal: number }
+    | { source: "phone" | "walk_in" }
+  );
+
+// Prices for a booking created by admin. All money in tetri.
+// booking_com: roomTotal is Booking's amount with breakfast included;
+// dinner is charged separately; commission applies to roomTotal only.
+// phone/walk_in: same as the website, no commission.
+export async function calculateAdminPrice(input: AdminPriceInput) {
+  if (input.source !== "booking_com") {
+    const price = await calculatePrice(input);
+    return {
+      ...price,
+      breakfast: input.breakfast,
+      commissionRateBp: 0,
+      commissionAmount: 0,
+      netTotal: price.totalPrice,
+    };
+  }
+
+  // Breakfast is included in Booking's amount, so only dinner is charged here
+  const price = await calculatePrice({ ...input, breakfast: false });
+  const commissionRateBp = await currentCommissionRateBp("booking_com");
+  const roomTotal = input.roomTotal;
+  const commissionAmount = Math.round((roomTotal * commissionRateBp) / 10_000);
+  const totalPrice = roomTotal + price.mealsTotal;
+
+  return {
+    ...price,
+    breakfast: true,
+    roomPricePerNight: null,
+    roomTotal,
+    totalPrice,
+    commissionRateBp,
+    commissionAmount,
+    netTotal: totalPrice - commissionAmount,
   };
 }
