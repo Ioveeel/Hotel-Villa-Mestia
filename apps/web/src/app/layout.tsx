@@ -42,7 +42,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${notoSans.variable} ${notoSerif.variable} ${notoSansGeorgian.variable} ${notoSerifGeorgian.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      {/* Extensions (e.g. ColorZilla) add attributes to <body> before hydration */}
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }
