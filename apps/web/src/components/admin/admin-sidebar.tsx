@@ -3,18 +3,24 @@ import {
   CalendarDays,
   ChartColumn,
   ClipboardList,
+  House,
   Receipt,
 } from "lucide-react";
 import { AdminNavLink } from "./admin-nav-link";
 
 // Sections without href are not built yet
-const sections: { label: string; icon: typeof CalendarDays; href?: string }[] =
-  [
-    { label: "Calendar", icon: CalendarDays, href: "/admin/calendar" },
-    { label: "Bookings", icon: ClipboardList },
-    { label: "Expenses", icon: Receipt, href: "/admin/expenses" },
-    { label: "Reports", icon: ChartColumn },
-  ];
+const sections: {
+  label: string;
+  icon: typeof CalendarDays;
+  href?: string;
+  exact?: boolean;
+}[] = [
+  { label: "Today", icon: House, href: "/admin", exact: true },
+  { label: "Calendar", icon: CalendarDays, href: "/admin/calendar" },
+  { label: "Bookings", icon: ClipboardList },
+  { label: "Expenses", icon: Receipt, href: "/admin/expenses" },
+  { label: "Reports", icon: ChartColumn, href: "/admin/reports" },
+];
 
 export function AdminSidebar() {
   return (
@@ -29,10 +35,10 @@ export function AdminSidebar() {
       </div>
       <nav aria-label="Admin" className="overflow-x-auto px-2 pb-2 md:pb-0">
         <ul className="flex gap-1 md:flex-col">
-          {sections.map(({ label, icon: Icon, href }) => (
+          {sections.map(({ label, icon: Icon, href, exact }) => (
             <li key={label}>
               {href ? (
-                <AdminNavLink href={href}>
+                <AdminNavLink href={href} exact={exact}>
                   <Icon aria-hidden className="size-4.5" />
                   {label}
                 </AdminNavLink>

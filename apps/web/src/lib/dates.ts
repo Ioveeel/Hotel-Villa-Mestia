@@ -46,3 +46,26 @@ export function monthRange(month: string): { from: string; to: string } {
     to: addDays(`${addMonths(month, 1)}-01`, -1),
   };
 }
+
+export type RangePreset = "today" | "week" | "month" | "last-month";
+
+// Inclusive ranges; weeks start on Monday
+export function presetRange(
+  preset: RangePreset,
+  today: string,
+): { from: string; to: string } {
+  switch (preset) {
+    case "today":
+      return { from: today, to: today };
+    case "week": {
+      // getUTCDay: 0 = Sunday
+      const weekday = (new Date(`${today}T00:00:00Z`).getUTCDay() + 6) % 7;
+      const from = addDays(today, -weekday);
+      return { from, to: addDays(from, 6) };
+    }
+    case "month":
+      return monthRange(today.slice(0, 7));
+    case "last-month":
+      return monthRange(addMonths(today.slice(0, 7), -1));
+  }
+}

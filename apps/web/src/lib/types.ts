@@ -290,3 +290,33 @@ export type CreateExpenseInput = {
 export type UpdateExpenseInput = Partial<
   Omit<CreateExpenseInput, "description"> & { description: string | null }
 >;
+
+// GET /admin/reports. Range is inclusive: [from, to]. Exact amounts in tetri.
+export type ReportDay = {
+  date: string;
+  occupiedRooms: number;
+  activeRooms: number;
+  // Percent, one decimal
+  occupancy: number;
+  grossRevenue: number;
+  commission: number;
+  netRevenue: number;
+  expenses: number;
+  profit: number;
+  cashReceived: number;
+  cardReceived: number;
+  breakfastGuests: number;
+  dinnerGuests: number;
+};
+
+export type ReportTotals = Omit<ReportDay, "date" | "activeRooms"> & {
+  // Room-nights available in the range
+  activeRoomNights: number;
+};
+
+export type Report = {
+  from: string;
+  to: string;
+  days: ReportDay[];
+  totals: ReportTotals;
+};

@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { formatTetriAsGel, parseGelToTetri } from "./format.ts";
+import {
+  formatReportAmount,
+  formatTetriAsGel,
+  parseGelToTetri,
+  roundToFiveTetri,
+} from "./format.ts";
 
 test("parseGelToTetri: whole lari", () => {
   assert.equal(parseGelToTetri("220"), 22000);
@@ -53,4 +58,29 @@ test("formatTetriAsGel round-trips with parseGelToTetri", () => {
   for (const tetri of [1, 29, 100, 22050, 999999999]) {
     assert.equal(parseGelToTetri(formatTetriAsGel(tetri)), tetri);
   }
+});
+
+test("roundToFiveTetri: by last digit", () => {
+  assert.equal(roundToFiveTetri(12340), 12340);
+  assert.equal(roundToFiveTetri(12342), 12340);
+  assert.equal(roundToFiveTetri(12343), 12345);
+  assert.equal(roundToFiveTetri(12347), 12345);
+  assert.equal(roundToFiveTetri(12348), 12350);
+  assert.equal(roundToFiveTetri(12399), 12400);
+  assert.equal(roundToFiveTetri(0), 0);
+  assert.equal(roundToFiveTetri(2), 0);
+});
+
+test("roundToFiveTetri: negative amounts round by magnitude", () => {
+  assert.equal(roundToFiveTetri(-12343), -12345);
+  assert.equal(roundToFiveTetri(-12348), -12350);
+  assert.equal(roundToFiveTetri(-1), 0);
+  assert.ok(Object.is(roundToFiveTetri(-1), 0));
+});
+
+test("formatReportAmount", () => {
+  assert.equal(formatReportAmount(12000), "120 ₾");
+  assert.equal(formatReportAmount(12053), "120.55 ₾");
+  assert.equal(formatReportAmount(123456789), "1,234,567.90 ₾");
+  assert.equal(formatReportAmount(-5003), "-50.05 ₾");
 });

@@ -19,6 +19,7 @@ import type {
   PaymentMethod,
   Quote,
   QuoteQuery,
+  Report,
   RoomType,
   UpdateExpenseInput,
 } from "./types";
@@ -219,4 +220,13 @@ export function updateExpense(
 
 export function deleteExpense(id: number): Promise<void> {
   return request(`/admin/expenses/${id}`, { method: "DELETE" });
+}
+
+// Admin only: pass the session cookie in init.headers. Range is inclusive.
+export function getReport(
+  query: { from: string; to: string },
+  init?: RequestInit,
+): Promise<Report> {
+  const params = new URLSearchParams(query);
+  return request(`/admin/reports?${params}`, init);
 }

@@ -54,3 +54,23 @@ export function formatTetriAsGel(tetri: number): string {
   const rest = tetri % 100;
   return rest ? `${lari}.${String(rest).padStart(2, "0")}` : String(lari);
 }
+
+// Report display rounding to 5 tetri by the last digit:
+// 0-2 -> 0, 3-7 -> 5, 8-9 -> next 10. Negative amounts round by magnitude.
+export function roundToFiveTetri(tetri: number): number {
+  const abs = Math.abs(tetri);
+  const last = abs % 10;
+  const step = last <= 2 ? 0 : last <= 7 ? 5 : 10;
+  const rounded = abs - last + step;
+  return tetri < 0 && rounded !== 0 ? -rounded : rounded;
+}
+
+// Exact report amount -> "1,234.55 ₾" (rounded to 5 tetri, grouped thousands)
+export function formatReportAmount(tetri: number): string {
+  const lari = roundToFiveTetri(tetri) / 100;
+  const amount = new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: Number.isInteger(lari) ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(lari);
+  return `${amount} ₾`;
+}

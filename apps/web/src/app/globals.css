@@ -39,6 +39,10 @@
   --source-phone: #9e4f1b;
   --source-walk-in: #5e6670;
   --bar-foreground: #f7f5f0;
+  /* Report chart series (CVD-validated against --card) */
+  --chart-revenue: #2a78d6;
+  --chart-expenses: #d0622c;
+  --chart-profit: #1a9a6c;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -62,6 +66,9 @@
     --source-phone: #a85622;
     --source-walk-in: #5b6570;
     --bar-foreground: #f7f5f0;
+    --chart-revenue: #3987e5;
+    --chart-expenses: #d95926;
+    --chart-profit: #199e70;
   }
 }
 
@@ -85,6 +92,9 @@
   --source-phone: #a85622;
   --source-walk-in: #5b6570;
   --bar-foreground: #f7f5f0;
+  --chart-revenue: #3987e5;
+  --chart-expenses: #d95926;
+  --chart-profit: #199e70;
 }
 
 /* shadcn aliases. Declared on every theme scope so nested .light/.dark re-resolve them. */
@@ -127,6 +137,9 @@
   --color-source-phone: var(--source-phone);
   --color-source-walk-in: var(--source-walk-in);
   --color-bar-foreground: var(--bar-foreground);
+  --color-chart-revenue: var(--chart-revenue);
+  --color-chart-expenses: var(--chart-expenses);
+  --color-chart-profit: var(--chart-profit);
 
   /* Latin/Cyrillic face first, Georgian face catches Georgian glyphs */
   --font-sans: var(--font-noto-sans), var(--font-noto-sans-georgian), ui-sans-serif, system-ui, sans-serif;

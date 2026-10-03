@@ -7,12 +7,16 @@ import { cn } from "@/lib/utils";
 
 export function AdminNavLink({
   href,
+  exact,
   children,
 }: {
   href: string;
+  // Active only on href itself, not on its subpaths
+  exact?: boolean;
   children: ReactNode;
 }) {
-  const active = usePathname().startsWith(href);
+  const pathname = usePathname();
+  const active = exact ? pathname === href : pathname.startsWith(href);
   return (
     <Link
       href={href}
