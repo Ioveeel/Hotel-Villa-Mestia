@@ -320,3 +320,41 @@ export type Report = {
   days: ReportDay[];
   totals: ReportTotals;
 };
+
+// GET /admin/bookings. All filters optional; from/to are inclusive days
+// (a stay matches if it has a night in [from, to]).
+export type AdminBookingListQuery = {
+  q?: string;
+  status?: BookingStatus;
+  source?: BookingSource;
+  paid?: boolean;
+  from?: string;
+  to?: string;
+  page?: number;
+  pageSize?: number;
+};
+
+export type AdminBookingListItem = {
+  id: number;
+  roomNumber: number;
+  roomTypeName: string;
+  guestName: string;
+  phone: string | null;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  source: BookingSource;
+  status: BookingStatus;
+  totalPrice: number;
+  netTotal: number;
+  paidAt: string | null;
+  paymentMethod: PaymentMethod | null;
+};
+
+// Newest check-in first
+export type AdminBookingList = {
+  items: AdminBookingListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+};

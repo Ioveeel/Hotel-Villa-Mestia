@@ -10,7 +10,7 @@ import {
   Phone,
   Undo2,
 } from "lucide-react";
-import { sourceStyles } from "@/components/admin/booking-calendar";
+import { SourceBadge, StatusBadge } from "@/components/admin/booking-badges";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +21,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,11 +40,7 @@ import {
   updateGuestDocument,
 } from "@/lib/api";
 import { formatDate, formatDateTime, formatPrice } from "@/lib/format";
-import type {
-  AdminBookingDetails,
-  BookingStatus,
-  PaymentMethod,
-} from "@/lib/types";
+import type { AdminBookingDetails, PaymentMethod } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const NETWORK_ERROR = "Could not reach the server. Please try again.";
@@ -62,18 +57,7 @@ function parseBookingId(value: string | null): number | null {
   return value && /^[1-9][0-9]{0,9}$/.test(value) ? Number(value) : null;
 }
 
-const statusVariant: Record<
-  BookingStatus,
-  React.ComponentProps<typeof Badge>["variant"]
-> = {
-  pending: "accent",
-  confirmed: "outline",
-  checked_in: "glacier",
-  checked_out: "secondary",
-  cancelled: "destructive",
-};
-
-// Reads ?booking=<id>; the calendar bars set it (see booking-bar-link.tsx)
+// Reads ?booking=<id>; set by BookingLink (see booking-link.tsx)
 export function BookingPanel() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -166,7 +150,6 @@ function BookingDetails({ id }: { id: number }) {
   }
 
   const b = booking;
-  const source = sourceStyles[b.source];
   const isBookingCom = b.source === "booking_com";
   const cancelled = b.status === "cancelled";
   const guestName = `${b.guest.firstName} ${b.guest.lastName}`;
@@ -189,17 +172,8 @@ function BookingDetails({ id }: { id: number }) {
       <PanelHeader>
         <SheetTitle>Booking #{b.id}</SheetTitle>
         <div className="flex flex-wrap items-center gap-2">
-          <span
-            className={cn(
-              "inline-flex h-6 items-center rounded-full px-2.5 text-xs font-medium text-bar-foreground",
-              source.className,
-            )}
-          >
-            {source.label}
-          </span>
-          <Badge variant={statusVariant[b.status]} className="capitalize">
-            {b.status.replace("_", " ")}
-          </Badge>
+          <SourceBadge source={b.source} />
+          <StatusBadge status={b.status} />
           {b.externalRef && (
             <span className="text-xs text-muted-foreground">
               Ref. {b.externalRef}

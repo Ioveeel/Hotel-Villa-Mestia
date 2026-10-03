@@ -2,6 +2,8 @@ import type {
   Admin,
   AdminBooking,
   AdminBookingDetails,
+  AdminBookingList,
+  AdminBookingListQuery,
   AdminGuest,
   AdminBookingPreview,
   AdminBookingPreviewInput,
@@ -154,6 +156,18 @@ export function createAdminBooking(
     method: "POST",
     body: JSON.stringify(input),
   });
+}
+
+// Admin only: on the server, pass the session cookie in init.headers
+export function getAdminBookings(
+  query: AdminBookingListQuery,
+  init?: RequestInit,
+): Promise<AdminBookingList> {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined) params.set(key, String(value));
+  }
+  return request(`/admin/bookings?${params}`, init);
 }
 
 export function getAdminBooking(

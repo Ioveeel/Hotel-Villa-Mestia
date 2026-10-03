@@ -17,7 +17,7 @@ const sections: {
 }[] = [
   { label: "Today", icon: House, href: "/admin", exact: true },
   { label: "Calendar", icon: CalendarDays, href: "/admin/calendar" },
-  { label: "Bookings", icon: ClipboardList },
+  { label: "Bookings", icon: ClipboardList, href: "/admin/bookings" },
   { label: "Expenses", icon: Receipt, href: "/admin/expenses" },
   { label: "Reports", icon: ChartColumn, href: "/admin/reports" },
 ];
